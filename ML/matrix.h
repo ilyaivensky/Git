@@ -3,6 +3,7 @@
 #define	_MATRIX_H
 #include <vector>
 #include "random.h"
+#include "vector_utils.h"
 
 using namespace std;
 
@@ -29,6 +30,9 @@ struct Matrix : public vector<vector<T> >
 
 	Matrix transform(vector<T> (*t)(const vector<T> &)) const;
 
+	// Creates binary 1 : -1 matrix
+	static Matrix binary(const Matrix & m);
+
 	static Matrix<T> diag(unsigned n, T lambda); 
 
 	bool is_square() const { return row == col; }
@@ -41,14 +45,17 @@ template <class T>
 ostream & operator<<(ostream & os, const Matrix<T> & m);
 
 template <class T>
-ostream & operator<<(ostream & os, const vector<T> & v)
-{
-	for (unsigned i = 0; i < v.size(); ++i)
-		cerr << v[i] << "\t";
+Matrix<T> operator *(const Matrix<T> & m, const vector<T> & v);
 
-	return os;
-}
+template <class T>
+Matrix<T> operator *(const Matrix<T> & m, const Matrix<T> & v);
 
+template <class T>
+Matrix<T> & operator+=(Matrix<T> & m1, const Matrix<T> & m2);
+
+/***************************************************************
+* IMPLEMENTATIONS
+****************************************************************/
 template <class T>
 Matrix<T> Matrix<T>::diag(unsigned n, T lambda)
 {
@@ -57,6 +64,17 @@ Matrix<T> Matrix<T>::diag(unsigned n, T lambda)
 		r[i][i] = lambda;
 
 	return r;
+}
+
+template <class T>
+Matrix<T> Matrix<T>::binary(const Matrix<T> & m)
+{
+	Matrix<T> res(m.row, m.col);
+	for (unsigned r = 0; r < m.row; ++r)
+		for (unsigned c = 0; c < m.col; ++c)
+			res[r][c] = m[r][c] > 0 ? 1 : -1;
+
+	return res;
 }
 
 template <class T>
@@ -207,6 +225,16 @@ Matrix<T> operator *(const Matrix<T> & m1, const Matrix<T> & m2)
 			res[m][n] = elem;
 		}
 	}
+
+	return res;
+}
+
+template <class T>
+Matrix<T> operator *(const Matrix<T> & m, const vector<T> & v)
+{
+	Matrix<T> res(m.row, 1);
+	for (unsigned r = 0; r < m.row; ++r)
+		res[r][0] = dot_product(m[r], v);
 
 	return res;
 }
