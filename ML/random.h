@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// Returns random float in range [-1.0, 1.0]
+// Returns random in range [-1.0, 1.0]
 template<class T>
 inline T random()
 {
