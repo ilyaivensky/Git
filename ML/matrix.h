@@ -30,8 +30,8 @@ struct Matrix : public vector<vector<T> >
 
 	Matrix transform(vector<T> (*t)(const vector<T> &)) const;
 
-	// Creates binary 1 : -1 matrix
-	static Matrix binary(const Matrix & m);
+	// Creates binary matrix according to the label function
+	static Matrix binary(const Matrix & m, signed (*label)(const T &));
 
 	static Matrix<T> diag(unsigned n, T lambda); 
 
@@ -67,12 +67,12 @@ Matrix<T> Matrix<T>::diag(unsigned n, T lambda)
 }
 
 template <class T>
-Matrix<T> Matrix<T>::binary(const Matrix<T> & m)
+Matrix<T> Matrix<T>::binary(const Matrix<T> & m, signed (*label)(const T &))
 {
 	Matrix<T> res(m.row, m.col);
 	for (unsigned r = 0; r < m.row; ++r)
 		for (unsigned c = 0; c < m.col; ++c)
-			res[r][c] = m[r][c] > 0 ? 1 : -1;
+			res[r][c] = label(m[r][c]);
 
 	return res;
 }
