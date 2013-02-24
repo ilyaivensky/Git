@@ -2,6 +2,7 @@
 #define _LOGISTIC_REGRESSION_H
 
 #include <cstdlib>
+#include <algorithm>
 #include "matrix.h"
 #include "vector_utils.h"
 
@@ -22,7 +23,7 @@ unsigned logistic_regression(const Matrix<T> & x, const Matrix<T> & y, vector<T>
 		for (unsigned i = 0; i < x.row; ++i)
 			examples[i] = i;
 
-		random_permutation(examples);
+		std::random_shuffle(examples.begin(), examples.end());
 
 		vector<T> prev_w(w);
 		for (unsigned i = 0; i < examples.size(); ++i)

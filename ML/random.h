@@ -8,9 +8,11 @@ using namespace std;
 
 // Returns random in range [-1.0, 1.0]
 template<class T>
-inline T random()
+inline T random(T min = -1.0, T max = 1.0)
 {
-	T r = ((T(rand() % 200)) / 100) - 1;
+	T delta = max - min;
+	unsigned m = unsigned(100 * delta);
+	T r = ((T(rand() % m)) / 100) + min;
 	return r;
 }
 
