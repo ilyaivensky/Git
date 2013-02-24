@@ -3,13 +3,25 @@
 
 #include "matrix.h"
 
+namespace PLA
+{
+template <class T>
+signed label(const T & r)
+{
+	return r > 0 ? 1 : 0;
+}
+
 template <class T>
 unsigned train_perceptron(
-	const Matrix<T> & data, 
-	const vector<signed> & desired_target,
+	const Matrix<T> & x, 
+	const Matrix<T> & y,
 	vector<T> & w)
 {
 	unsigned count = 0;
+
+	vector<signed> target(y.row);
+	for (unsigned r = 0; r < y.row; ++r)
+		target[r] = label(y[r][0]); 
 
 	//cerr << "Perceptron input w=[" << w << "]" << endl;
 	//cerr << "Data:" << endl << data << endl;
@@ -21,14 +33,10 @@ unsigned train_perceptron(
 		vector<pair<unsigned, signed> > misclassified; 
 
 		// Test and get a list of misclassified
-		for (unsigned m = 0; m < 10/*data.row*/; ++m)
+		for (unsigned m = 0; m < x.row; ++m)
 		{
-			float res = 0.0;
-			for (unsigned n = 0; n < data.col; ++n)
-				res += (w[n] * data[m][n]);
-
-			signed g = (res > 0 ? 1 : 0);
-			signed error = desired_target[m] - g;
+			signed g = label(dot_product(w, x[m]));
+			signed error = target[m] - g; // set error -1 or 0 or 1
 			if (error)
 			{
 				misclassified.push_back(make_pair(m, error)); 
@@ -50,9 +58,9 @@ unsigned train_perceptron(
 			unsigned m = misclassified[toFix].first;
 			
 			// Update w using selected random misclassified
-			vector<float> next_w(w.size());
-			for (unsigned n = 0; n < data.col; ++n)
-				next_w[n] = w[n] + error * data[m][n];
+			vector<T> next_w(w.size());
+			for (unsigned n = 0; n < x.col; ++n)
+				next_w[n] = w[n] + error * x[m][n];
 
 			if (w == next_w)
 				throw exception("Failed to ajust weights\n");
@@ -64,4 +72,5 @@ unsigned train_perceptron(
 	return count;
 }
 
+} // namespace
 #endif
