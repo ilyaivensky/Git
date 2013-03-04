@@ -2,6 +2,7 @@
 #ifndef _MATRIX_H
 #define	_MATRIX_H
 #include <vector>
+#include <limits>
 #include "random.h"
 #include "vector_utils.h"
 
@@ -33,6 +34,8 @@ struct Matrix : public vector<vector<T> >
 	// Creates binary matrix according to the label function
 	static Matrix binary(const Matrix & m, signed (*label)(const T &));
 
+	void scale(T lb, T ub);
+
 	static Matrix<T> diag(unsigned n, T lambda); 
 
 	bool is_square() const { return row == col; }
@@ -52,6 +55,12 @@ Matrix<T> operator *(const Matrix<T> & m, const Matrix<T> & v);
 
 template <class T>
 Matrix<T> & operator+=(Matrix<T> & m1, const Matrix<T> & m2);
+
+template <class T>
+bool operator ==(const Matrix<T> & m1, const Matrix<T> & m2);
+
+template <class T>
+bool operator !=(const Matrix<T> & m1, const Matrix<T> & m2);
 
 /***************************************************************
 * IMPLEMENTATIONS
@@ -75,6 +84,36 @@ Matrix<T> Matrix<T>::binary(const Matrix<T> & m, signed (*label)(const T &))
 			res[r][c] = label(m[r][c]);
 
 	return res;
+}
+
+template <class T>
+void Matrix<T>::scale(T lb, T ub)
+{
+	if (ub <= lb)
+		throw exception("upper bound is not greater than lower bound");
+
+	vector<T> feature_max(col, numeric_limits<T>::min());
+	vector<T> feature_min(col, numeric_limits<T>::max());
+
+	for (unsigned r = 0; r < row; ++r)
+		for (unsigned c = 0; c < col; ++c)
+		{
+			feature_max[c] = std::max((*this)[r][c], feature_max[c]);
+			feature_min[c] = std::min((*this)[r][c], feature_min[c]);
+		}
+
+	for (unsigned r = 0; r < row; ++r)
+		for (unsigned c = 0; c < col; ++c)
+		{
+			if (feature_max[c] == feature_min[c])
+				continue;
+			if ((*this)[r][c] == feature_min[c])
+				(*this)[r][c] = lb;
+			else if ((*this)[r][c] == feature_max[c])
+				(*this)[r][c] = ub;
+			else
+				(*this)[r][c] = lb + (ub - lb) * ((*this)[r][c]  - feature_min[c]) / (feature_max[c] - feature_min[c]);
+		}
 }
 
 template <class T>
@@ -239,6 +278,24 @@ Matrix<T> operator *(const Matrix<T> & m, const vector<T> & v)
 	return res;
 }
 
+template <class T>
+bool operator ==(const Matrix<T> & m1, const Matrix<T> & m2)
+{
+	if (m1.row != m2.row || m1.col != m2.col)
+		return false;
+
+	for (unsigned r = 0; r < m1.row; ++r)
+		if (m1[r] != m2[r])
+			return false;
+
+	return true;
+}
+
+template <class T>
+bool operator !=(const Matrix<T> & m1, const Matrix<T> & m2)
+{
+	return !operator==(m1, m2);
+}
 // X(m,n), Y(m,n) - treated as transposed
 template <class T>
 Matrix<T> Matrix<T>::multiply_by_transposed(const Matrix<T> & other) const
