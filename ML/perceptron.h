@@ -21,7 +21,7 @@ unsigned train_perceptron(
 
 	vector<signed> target(y.row);
 	for (unsigned r = 0; r < y.row; ++r)
-		target[r] = label(y[r][0]); 
+		target[r] = PLA::label(y[r][0]); 
 
 	//cerr << "Perceptron input w=[" << w << "]" << endl;
 	//cerr << "Data:" << endl << data << endl;
