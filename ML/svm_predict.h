@@ -1,70 +1,70 @@
-/*
- * svm_predict.h
+ /*                                                                 -*- C++ -*-
+ * File: svm_predict.h
+ * 
+ * Author: Ellie Ivensky  
+ * Created on: Mar 4, 2013
  *
- *  Created on: Mar 4, 2013
- *      Author: eivensky
+ * algorithms/machine_learning/svm/svm_predict.h
+ *
+ * Description:
+ *   C++ interface for libSVM 
+ *   
  */
 
 #ifndef SVM_PREDICT_H_
 #define SVM_PREDICT_H_
 
 #include <stdio.h>
-#include <ctype.h>
-#include <stdlib.h>
 #include <string>
-#include <errno.h>
-#include "libsvm-3.16\svm.h"
 
 using namespace std;
 
-namespace SVM {
+struct svm_node;
+struct svm_model;
+
+namespace SV {
 
 class SVM_Predict {
 
 public:  
   
-  SVM_Predict(bool predict_probability = false);
+  SVM_Predict();
+  SVM_Predict(const string & model_file, 
+      bool predict_probability = false);
+  
   ~SVM_Predict();
   
-  void init(const string & model_file);
-  double do_predict(FILE *input, FILE * output);
+  void init(const string & model_file, 
+      bool predict_probability = false);
+  
+  const svm_model * get_model() const { return model; } 
+  
+  // Batch processing. 
+  double predict(FILE *input, FILE * output);
+  
+  // Processing single feature set
+  double predict(const svm_node * input, double * prob_estimates = NULL) const;
   
 private: 
   
+  double batch_predict(FILE *input, FILE *output);
   int print_null(const char *s,...) {return 0;}
-
-  struct svm_node *x;
+  
+private: 
+  
+  svm_node *x; // features, used only for batch processing  
+  svm_model* model; // a classifier
+  
+  // Internal data, not passed to core
+  
+  bool predict_probability_;
+  
+  // Used to read a file input
   int max_nr_attr;
-
-  struct svm_model* model;
-  bool predict_probability;
-
   char *line;
   int max_line_len;
 
   char* readline(FILE *input);
-  
-private: 
-  
-void exit_input_error(int line_num)
-{
-  fprintf(stderr,"Wrong input format at line %d\n", line_num);
-  exit(1);
-}
-
-double predict(FILE *input, FILE *output);
-
-void exit_with_help()
-{
-  printf(
-  "Usage: svm-predict [options] test_file model_file output_file\n"
-  "options:\n"
-  "-b probability_estimates: whether to predict probability estimates, 0 or 1 (default 0); for one-class SVM only 0 is supported\n"
-  "-q : quiet mode (no outputs)\n"
-  );
-  exit(1);
-}
-
 };
 
 } // namesapace

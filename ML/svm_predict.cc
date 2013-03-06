@@ -6,18 +6,31 @@
  */
 
 #include "svm_predict.h"
+#include "svm.h"
 
-namespace SVM {
+#include <exception>
+#include <sstream>
+#include <errno.h>
+
+namespace SV {
 
 int (*info)(const char *fmt,...) = &printf;
 
-SVM_Predict::SVM_Predict(bool predict_probability) : 
-   x(NULL), 
-   max_nr_attr(64),
+SVM_Predict::SVM_Predict() : 
    model(NULL),
-   predict_probability(predict_probability), 
+   predict_probability_(false),  
+   max_nr_attr(64),
    line(NULL)
 {
+}
+
+SVM_Predict::SVM_Predict(const string & model_file, bool predict_probability) : 
+    model(NULL),
+    predict_probability_(false),  
+    max_nr_attr(64),
+    line(NULL)
+{
+  init(model_file, predict_probability);
 }
 
 SVM_Predict::~SVM_Predict()
@@ -25,13 +38,47 @@ SVM_Predict::~SVM_Predict()
   svm_free_and_destroy_model(&model);
 }
 
-void SVM_Predict::init(const string & model_file)
+void SVM_Predict::init(const string & model_file, bool predict_probability)
 {
+  predict_probability_ = predict_probability;
+  
   if((model=svm_load_model(model_file.c_str()))==0)
   {
-    fprintf(stderr,"can't open model file %s\n",model_file.c_str());
-    exit(1);
+	  stringstream msg;
+	  msg << "can't open model file " << model_file;
+	  throw exception(msg.str().c_str());
   }
+  
+  model->sv_indices = NULL;
+  
+  if (predict_probability_)
+  {
+    if(svm_check_probability_model(model)==0)
+      throw exception("Model does not support probability estimates"); 
+  }
+  else if (svm_check_probability_model(model)!=0)
+    info("Model supports probability estimates, but disabled in prediction.\n");
+}
+
+double SVM_Predict::predict(const svm_node * x, double * prob_estimates) const
+{
+  if (predict_probability_)
+  {
+    int svm_type=svm_get_svm_type(model);
+    if (svm_type==C_SVC || svm_type==NU_SVC)
+      return svm_predict_probability(model,x,prob_estimates);
+  }
+   
+  return svm_predict(model,x);
+}
+
+double SVM_Predict::predict(FILE *input, FILE * output)
+{  
+  x = (struct svm_node *) malloc(max_nr_attr*sizeof(struct svm_node));
+  double retval = batch_predict(input, output);
+  free(x);
+  free(line);
+  return retval;
 }
 
 char* SVM_Predict::readline(FILE *input)
@@ -52,7 +99,7 @@ char* SVM_Predict::readline(FILE *input)
   return line;
 }
 
-double SVM_Predict::predict(FILE *input, FILE *output)
+double SVM_Predict::batch_predict(FILE *input, FILE *output)
 {
   int correct = 0;
   int total = 0;
@@ -64,7 +111,7 @@ double SVM_Predict::predict(FILE *input, FILE *output)
   double *prob_estimates=NULL;
   int j;
 
-  if(predict_probability)
+  if(predict_probability_)
   {
     if (svm_type==NU_SVR || svm_type==EPSILON_SVR)
       info("Prob. model for test data: target value = predicted value + z,\nz: Laplace distribution e^(-|z|/sigma)/(2sigma),sigma=%g\n",svm_get_svr_probability(model));
@@ -92,12 +139,20 @@ double SVM_Predict::predict(FILE *input, FILE *output)
 
     label = strtok(line," \t\n");
     if(label == NULL) // empty line
-      exit_input_error(total+1);
+	{
+		stringstream msg;
+		msg << "Wrong input format at line " << total+1;
+        throw exception(msg.str().c_str());
+	}
 
     target_label = strtod(label,&endptr);
     if(endptr == label || *endptr != '\0')
-      exit_input_error(total+1);
-
+	{
+		stringstream msg;
+		msg << "Wrong input format at line " << total+1;
+        throw exception(msg.str().c_str());
+	}
+    
     while(1)
     {
       if(i>=max_nr_attr-1)  // need one more for index = -1
@@ -114,20 +169,28 @@ double SVM_Predict::predict(FILE *input, FILE *output)
       errno = 0;
       x[i].index = (int) strtol(idx,&endptr,10);
       if(endptr == idx || errno != 0 || *endptr != '\0' || x[i].index <= inst_max_index)
-        exit_input_error(total+1);
+	  {
+		  stringstream msg;
+		  msg << "Wrong input format at line " << total+1;
+          throw exception(msg.str().c_str());
+	  }
       else
         inst_max_index = x[i].index;
 
       errno = 0;
       x[i].value = strtod(val,&endptr);
       if(endptr == val || errno != 0 || (*endptr != '\0' && !isspace(*endptr)))
-        exit_input_error(total+1);
+		   {
+		  stringstream msg;
+		  msg << "Wrong input format at line " << total+1;
+          throw exception(msg.str().c_str());
+	  }
 
       ++i;
     }
     x[i].index = -1;
 
-    if (predict_probability && (svm_type==C_SVC || svm_type==NU_SVC))
+    if (predict_probability_ && (svm_type==C_SVC || svm_type==NU_SVC))
     {
       predict_label = svm_predict_probability(model,x,prob_estimates);
       fprintf(output,"%g",predict_label);
@@ -169,33 +232,11 @@ double SVM_Predict::predict(FILE *input, FILE *output)
     info("Accuracy = %g%% (%d/%d) (classification)\n",
       (double)correct/total*100,correct,total);
   }
-  if(predict_probability)
+  if(predict_probability_)
     free(prob_estimates);
 
   return retval;
 }
 
-double SVM_Predict::do_predict(FILE *input, FILE * output)
-{  
-  x = (struct svm_node *) malloc(max_nr_attr*sizeof(struct svm_node));
-  if(predict_probability)
-  {
-    if(svm_check_probability_model(model)==0)
-    {
-      fprintf(stderr,"Model does not support probabiliy estimates\n");
-      exit(1);
-    }
-  }
-  else
-  {
-    if(svm_check_probability_model(model)!=0)
-      info("Model supports probability estimates, but disabled in prediction.\n");
-  }
-
-  double retval = predict(input,output);
-  free(x);
-  free(line);
-  return retval;;
-}
-
 } // namespace
+
