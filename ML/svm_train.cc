@@ -1,26 +1,37 @@
+/*                                                                 -*- C++ -*-
+ * File: svm_train.h
+ * 
+ * Author: Ellie Ivensky
+ * Copyright (c) 2013 Idilia Inc, All rights reserved.
+ *
+ * algorithms/machine_learning/svm/svm_train.cc
+ *
+ * Description:
+ *   C++ interface for libSVM 
+ *   
+ */
+
 #include "svm_train.h"
 #include <cstdio>
 #include <cctype>
-#include <exception>
-#include <iostream>
 #include <sstream>
-
-#include <conio.h>
+#include <exception>
+#include <errno.h>
 
 using namespace std;
 
-namespace SVM {
+namespace SV {
 
 namespace {
 
 void exit_input_error(int line_num)
 {
-	stringstream message;
-	message << "Wrong input format at line " << line_num;
-	throw exception(message.str().c_str());
+	stringstream msg;
+	msg << "Wrong input format at line " << line_num;
+	throw exception(msg.str().c_str());
 }
 
-}
+} // namespace
 
 SVM_Train::SVM_Train() : 
 	model(NULL),
@@ -48,7 +59,6 @@ SVM_Train::SVM_Train() :
 
 SVM_Train::~SVM_Train()
 {
-	//svm_free_and_destroy_model(&model);
 }
 
 char* SVM_Train::readline(FILE *input)
@@ -78,9 +88,9 @@ void SVM_Train::read_problem(const char *filename)
 
 	if(fp == NULL)
 	{
-		stringstream message;
-		message << "can't open input file " << filename;
-		throw exception(message.str().c_str());
+		stringstream msg;
+		msg << "can't open input file " << filename;
+		throw exception(msg.str().c_str());
 	}
 
 	prob.l = 0;
@@ -159,17 +169,10 @@ void SVM_Train::read_problem(const char *filename)
 		for(i=0;i<prob.l;i++)
 		{
 			if (prob.x[i][0].index != 0)
-			{
-				stringstream message;
-				message << "Wrong input format: first column must be 0:sample_serial_number";
-				throw exception(message.str().c_str());		
-			}
+				throw exception("Wrong input format: first column must be 0:sample_serial_number");	
+			
 			if ((int)prob.x[i][0].value <= 0 || (int)prob.x[i][0].value > max_index)
-			{
-				stringstream message;
-				message << "Wrong input format: sample_serial_number out of range";
-				throw exception(message.str().c_str());		
-			}
+				throw exception("Wrong input format: sample_serial_number out of range");		
 		}
 
 	fclose(fp);
@@ -178,7 +181,6 @@ void SVM_Train::read_problem(const char *filename)
 void SVM_Train::do_train(const char * input_file_name, const char * model_file_name)
 {
 	const char *error_msg;
-	//parse_command_line(argc, argv, input_file_name, model_file_name);
 	read_problem(input_file_name);
 	error_msg = svm_check_parameter(&prob,&param);
 
@@ -188,10 +190,11 @@ void SVM_Train::do_train(const char * input_file_name, const char * model_file_n
 	model = svm_train(&prob,&param);
 	if(svm_save_model(model_file_name,model))
 	{
-		stringstream message;
-		message << "can't save model to file " << model_file_name;
-		throw exception(message.str().c_str());		
+		stringstream msg;
+		msg << "can't save model to file " << model_file_name;
+		throw exception(msg.str().c_str());
 	}
+	
 	svm_free_and_destroy_model(&model);
 	svm_destroy_param(&param);
 	free(prob.y);
@@ -264,3 +267,5 @@ double SVM_Train::do_cross_validation(const char * input_file_name, int n_fold)
 }
 
 } // namespace
+
+
