@@ -12,7 +12,7 @@
 //#pragma comment (lib,"C:/Program Files (x86)/MATLAB/R2012a Student/extern/lib/win32/microsoft/libmx.lib")
 //#pragma comment (lib,"C:/Program Files (x86)/MATLAB/R2012a Student/extern/lib/win32/microsoft/libut.lib")
 
-namespace SVM {
+namespace MATLAB_SV {
 
 template <class T>
 signed label(const T & r)
@@ -20,9 +20,16 @@ signed label(const T & r)
 	return r > 0 ? 1 : -1;
 }
 
+template <class T> 
+T linear_kernel(const vector<T> & v1, const vector<T> & v2)
+{
+	return dot_product(v1, v2);
+}
 
 template <class T>
-unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled, const Matrix<T> & y, vector<T> & w)
+unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled, 
+			   const Matrix<T> & y, vector<T> & w, 
+			   T (*kernel)(const vector<T> &, const vector<T> &))
 {	
 	const double inf = std::numeric_limits<T>::infinity();
 	const double zero = 0.0;
@@ -47,7 +54,7 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled, const Matrix<T> & y,
 	Matrix<T> quadr(x.row, x.row);
 	for (unsigned i = 0; i < x.row; ++i)
 		for (unsigned j = 0; j < x.row; ++ j)
-			quadr[i][j] = y[i][0] * y[j][0] * dot_product(x[i], x[j]);
+			quadr[i][j] = y[i][0] * y[j][0] * kernel(x[i], x[j]);
 #else
 	Matrix<T> yty = y.multiply_by_transposed(y);
 	Matrix<T> xtx = x.multiply_by_transposed(x);
