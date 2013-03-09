@@ -8,7 +8,7 @@ extern double e;
 namespace EF {
 
 template <class T>
-T classification(const T & h, const T & y)
+T binary_classification(const T & h, const T & y)
 {
 	return (h * y >= 0.0 ? 0.0 : 1.0);
 }
