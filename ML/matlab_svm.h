@@ -26,11 +26,22 @@ T linear_kernel(const vector<T> & v1, const vector<T> & v2)
 	return dot_product(v1, v2);
 }
 
+template <class T> 
+T second_order_polynomial_kernel(const vector<T> & v1, const vector<T> & v2)
+{
+	return pow(1 + dot_product(v1, v2), 2);
+}
+
+// x_non_scaled should include x0 = 1
 template <class T>
 unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled, 
 			   const Matrix<T> & y, vector<T> & w, 
 			   T (*kernel)(const vector<T> &, const vector<T> &))
 {	
+	for (unsigned r = 0; r < x_non_scaled.row; ++r)
+		if (x_non_scaled[r][0] != 1.0)
+			throw exception("Wrong format of input");
+	
 	const double inf = std::numeric_limits<T>::infinity();
 	const double zero = 0.0;
 	const double minus_one = -1.0;
@@ -43,26 +54,16 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 	for (unsigned r = 0; r < x_non_scaled.row; ++r)
 		for (unsigned c = 1; c < x_non_scaled.col; ++c)
 			x[r][c - 1] = x_non_scaled[r][c];
-
-	x.scale(-1.0, 1.0);
 	
 	/***************************************************************************
 	* Create H (quadr matrix)
 	* The number of rows and columns in H must equal the number of elements of f
 	*****************************************************************************/
-#if 1
+
 	Matrix<T> quadr(x.row, x.row);
 	for (unsigned i = 0; i < x.row; ++i)
 		for (unsigned j = 0; j < x.row; ++ j)
 			quadr[i][j] = y[i][0] * y[j][0] * kernel(x[i], x[j]);
-#else
-	Matrix<T> yty = y.multiply_by_transposed(y);
-	Matrix<T> xtx = x.multiply_by_transposed(x);
-	Matrix<T> quadr = yty * xtx;
-#endif
-
-	if (debug && x.row <= 10)
-		cerr << "quadr:" << endl << quadr << endl;
 
 	T * buff_H = (T*)malloc(sizeof(T) * quadr.row * quadr.col);
 	
