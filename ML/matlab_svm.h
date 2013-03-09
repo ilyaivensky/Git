@@ -1,16 +1,8 @@
 ﻿#ifndef _SVM_H
 #define _SVM_H
 
+#include "engine.h" // MATLAB engine
 #include "matrix.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include "engine.h"
-
-//#pragma comment (lib,"C:/Program Files (x86)/MATLAB/R2012a Student/extern/lib/win32/microsoft/libeng.lib")
-//#pragma comment (lib,"C:/Program Files (x86)/MATLAB/R2012a Student/extern/lib/win32/microsoft/libmx.lib")
-//#pragma comment (lib,"C:/Program Files (x86)/MATLAB/R2012a Student/extern/lib/win32/microsoft/libut.lib")
 
 namespace MATLAB_SV {
 
@@ -32,20 +24,27 @@ T second_order_polynomial_kernel(const vector<T> & v1, const vector<T> & v2)
 	return pow(1 + dot_product(v1, v2), 2);
 }
 
+/*******************************************************************************
+* Wrapper for MATLAB quadprog
+********************************************************************************/
+
 // x_non_scaled should include x0 = 1
 template <class T>
 unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled, 
 			   const Matrix<T> & y, vector<T> & w, 
-			   T (*kernel)(const vector<T> &, const vector<T> &))
+			   T (*kernel)(const vector<T> &, const vector<T> &),
+			   T c_upper_bound = std::numeric_limits<T>::infinity())
 {	
+	const double minus_one = -1.0;
+
+	/**************************************************
+	* sanity check
+	***************************************************/
+
 	for (unsigned r = 0; r < x_non_scaled.row; ++r)
 		if (x_non_scaled[r][0] != 1.0)
 			throw exception("Wrong format of input");
 	
-	const double inf = std::numeric_limits<T>::infinity();
-	const double zero = 0.0;
-	const double minus_one = -1.0;
-
 	/****************************************************** 
 	* Remove x0 and scale
 	*******************************************************/
@@ -128,7 +127,7 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 	************************************************************************************/
 	T * buff_beq = (T*)malloc(sizeof(T) * x.row);	
 	for (unsigned c = 0; c < quadr.row; ++c)
-		buff_beq[c] = zero;
+		buff_beq[c] = 0.0;
 
 	mxArray * beq =  mxCreateDoubleMatrix(1, quadr.row, mxREAL);
 
@@ -146,8 +145,8 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 	
 	for (unsigned c = 0; c < quadr.col; ++c)
 	{
-		buff_lb[c] = zero;
-		buff_ub[c] = 2000;//inf;
+		buff_lb[c] = 0.0;
+		buff_ub[c] = c_upper_bound;
 	}
 
 	mxArray * lb =  mxCreateDoubleMatrix(1, quadr.col, mxREAL);
@@ -169,15 +168,6 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 	mxArray * x0 =  mxCreateDoubleMatrix(0, 0, mxREAL);
 	engPutVariable(ep, "x0", x0);
 	
-    /*******************************************************
-	* Creating options
-	********************************************************/
-	//engEvalString(ep, "options=optimset('Algorithm','interior-point-convex')");
-	//engPutVariable(ep, "options", "optimset('Algorithm',interior-point-convex)");
-	//if (debug)
-		//_getch();
-	 
-
 	/*****************************************
 	* We well read results from this
 	******************************************/
@@ -207,13 +197,17 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 			double * res = mxGetPr(result);
 			cerr << *res << endl;
 		}
+
+		/********************************************************************
+		* Recover alpha
+		*********************************************************************/
 		T * buff_res = (T*)malloc(sizeof(T) * x.row);	
 		memcpy((void *)buff_res, (void *)mxGetPr(result), x.row * sizeof(T));
 
 		for (unsigned i = 0; i < x.row; ++i)
 		{
 			alpha[i] = buff_res[i];
-			if (abs(alpha[i]) > 0.001)
+			if (alpha[i] > 0.00001) // workaround for numerical problem, should be alpha[r] != 0
 				++sv_count;
 		}
 
@@ -245,19 +239,26 @@ unsigned learn(Engine * ep, const Matrix<T> & x_non_scaled,
 	mxDestroyArray(ub);
 	mxDestroyArray(x0);
 
+	/**********************************************
+	* Recover w 
+	***********************************************/
 	vector<T> w_sv(x.col, 0.0);
 	unsigned sv = x.row;
 	for (unsigned r = 0; r < x.row; ++r)
 		for (unsigned c = 0; c < x.col; ++c)
 		{
-			if (abs(alpha[r]) > 0.001)
+			if (alpha[r] > 0.00001) // workaround for numerical problem, should be alpha[r] != 0
 			{
 				w_sv[c] += alpha[r] * y[r][0] * x[r][c];
 				sv = r;
 			}
 		}
 
-	w[0] = y[sv][0] - dot_product(w_sv, x[sv]);
+	/**********************************************
+	* Recover b (aka w[0])
+	***********************************************/
+	w[0] = y[sv][0] - kernel(w_sv, x[sv]);
+
 	for (unsigned c = 0; c < x.col; ++c)
 		w[c + 1] = w_sv[c];
 
