@@ -29,7 +29,8 @@ struct Matrix : public vector<vector<T> >
 	// The same as above, but we transpose other
 	Matrix multiply_by_transposed(const Matrix & other) const;
 
-	Matrix transform(vector<T> (*t)(const vector<T> &)) const;
+	Matrix get_transformed(vector<T> (*t)(const vector<T> &)) const;
+	void transform_self(vector<T> (*t)(const vector<T> &));
 
 	// Creates binary matrix according to the label function
 	static Matrix binary(const Matrix & m, signed (*label)(const T &));
@@ -145,8 +146,11 @@ void Matrix<T>::random_init_0()
 }
 
 template <class T>
-Matrix<T> Matrix<T>::transform(vector<T> (*t)(const vector<T> &)) const
+Matrix<T> Matrix<T>::get_transformed(vector<T> (*t)(const vector<T> &)) const
 {
+	if (*t == 0)
+		return *this;
+
 	Matrix transformed(this->row, 0);
 	for (unsigned r = 0; r < this->row; ++r)
 		transformed[r] = t((*this)[r]);
@@ -154,6 +158,18 @@ Matrix<T> Matrix<T>::transform(vector<T> (*t)(const vector<T> &)) const
 	transformed.col = transformed[0].size();
 
 	return transformed;
+}
+
+template <class T>
+void Matrix<T>::transform_self(vector<T> (*t)(const vector<T> &))
+{
+	if (*t == 0)
+		return;
+
+	for (vector<vector<T> >::iterator it = this->begin(), itEnd = this->end(); it != itEnd; ++it)
+		*it = t(*it);
+
+	col = (*this)[0].size();
 }
 
 template <class T>
