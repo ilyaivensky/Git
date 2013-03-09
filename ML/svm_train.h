@@ -19,7 +19,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "svm.h"
+//#include "svm.h"
 
 #define Malloc(type,n) (type *)malloc((n)*sizeof(type))
 
