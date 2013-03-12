@@ -1,10 +1,8 @@
  /*                                                                 -*- C++ -*-
  * File: svm_predict.h
  * 
- * Author: Ellie Ivensky  
+ * Author: Ilya Ivensky  
  * Created on: Mar 4, 2013
- *
- * algorithms/machine_learning/svm/svm_predict.h
  *
  * Description:
  *   C++ interface for libSVM 

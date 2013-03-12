@@ -1,12 +1,9 @@
  /*                                                                 -*- C++ -*-
  * File: svm_train.h
  * 
- * Author: Ellie Ivensky
- * Copyright (c) 2013 Idilia Inc, All rights reserved.
+ * Author: Ilya Ivensky
  * 
  * Created on: Mar 4, 2013
- *
- * algorithms/machine_learning/svm/svm_train.h
  *
  * Description:
  *   C++ interface for libSVM 

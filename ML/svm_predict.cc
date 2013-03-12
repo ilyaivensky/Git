@@ -2,7 +2,7 @@
  * svm_predict.cc
  *
  *  Created on: Mar 4, 2013
- *      Author: eivensky
+ *  Author: Ilya Ivensky
  */
 
 #include "svm_predict.h"
