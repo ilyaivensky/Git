@@ -12,6 +12,7 @@
  */
 
 #include "svm_train.h"
+#include "libsvm-3.16/svm.h"
 #include <cstdio>
 #include <cctype>
 #include <sstream>
