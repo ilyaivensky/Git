@@ -1,4 +1,13 @@
-﻿#ifndef _SVM_H
+﻿/*                                                                 -*- C++ -*-
+ * File: matlab_svm.h
+ * 
+ * Author: Ilya Ivensky
+ * Created on: Mar 12, 2013
+ *
+ * Description: implemets SVM using MATLAB quadprog   
+ */
+
+#ifndef _SVM_H
 #define _SVM_H
 
 #include "engine.h" // MATLAB engine
@@ -23,6 +32,7 @@ T second_order_polynomial_kernel(const vector<T> & v1, const vector<T> & v2)
 {
 	return pow(1 + dot_product(v1, v2), 2);
 }
+
 
 /*******************************************************************************
 * Wrapper for MATLAB quadprog
