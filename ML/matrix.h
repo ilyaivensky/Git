@@ -11,15 +11,28 @@ using namespace std;
 template <class T>
 struct Matrix : public vector<vector<T> > 
 {
+	// Creates matrix row * col and initializes with 0.0
 	Matrix(unsigned row, unsigned col) : 
 		vector<vector<T> >(row, vector<T>(col, 0.0)), row(row), col(col) {}
 
-	Matrix(unsigned n) : 
+	// Creates square matrix n * n and initializes with 0.0
+ 	Matrix(unsigned n) : 
 		vector<vector<T> >(n, vector<T>(n, 0.0)), row(n), col(n) {}
+
+	// Creates empty matrix
+	Matrix() : row(0), col(0) {}
 
     void random_init();
 	void random_init_0();
 	void interactive_init();
+
+	bool empty() const { return row == 0; } 
+
+	void add_row(const vector<T> & x)
+	{
+		push_back(x);
+		++row;
+	}
 	
 	// throws exception if not square 
 	Matrix invert() const;
