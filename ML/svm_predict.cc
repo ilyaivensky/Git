@@ -6,7 +6,7 @@
  */
 
 #include "svm_predict.h"
-#include "svm.h"
+#include "libsvm-3.16/svm.h"
 
 #include <exception>
 #include <sstream>
