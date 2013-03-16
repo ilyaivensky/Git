@@ -1,3 +1,15 @@
+/*                                                                 -*- C++ -*-
+ * File: error_function.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Mar 1, 2013
+ *
+ * Description:
+ *   Calculates accuracy
+ *   
+ */
+
 #ifndef _ERROR_H
 #define _ERROR_H
 
@@ -25,11 +37,10 @@ T cross_entropy(const T & h, const T & y)
 	return log(1 + pow(e, -y * h));
 }
 
-template <class T, class W>
-T calc_error(const Matrix<T> & x, const W & w, const Matrix<T> & y, 
+template <class T>
+T calc_error(const Matrix<T> & h, const Matrix<T> & y, 
 		   T (*error_f)(const T &, const T &))
 {
-	Matrix<T> h = x * w;
 	T error = 0.0;
 	for (unsigned r = 0; r < h.row; ++r)
 		error += error_f(h[r][0], y[r][0]);
