@@ -1,6 +1,18 @@
- 
+/*                                                                 -*- C++ -*-
+ * File: matrix.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Mar 1, 2013
+ *
+ * Description:
+ *   Implementation of matrix and some operations
+ *   
+ */
+
 #ifndef _MATRIX_H
 #define	_MATRIX_H
+
 #include <vector>
 #include <limits>
 #include "random.h"
@@ -11,13 +23,15 @@ using namespace std;
 template <class T>
 struct Matrix : public vector<vector<T> > 
 {
+	typedef vector<T> Row;
+			
 	// Creates matrix row * col and initializes with 0.0
 	Matrix(unsigned row, unsigned col) : 
-		vector<vector<T> >(row, vector<T>(col, 0.0)), row(row), col(col) {}
+		vector<Row>(row, Row(col, 0.0)), row(row), col(col) {}
 
 	// Creates square matrix n * n and initializes with 0.0
  	Matrix(unsigned n) : 
-		vector<vector<T> >(n, vector<T>(n, 0.0)), row(n), col(n) {}
+		vector<Row>(n, Row(n, 0.0)), row(n), col(n) {}
 
 	// Creates empty matrix
 	Matrix() : row(0), col(0) {}
@@ -28,7 +42,7 @@ struct Matrix : public vector<vector<T> >
 
 	bool empty() const { return row == 0; } 
 
-	void add_row(const vector<T> & x)
+	void add_row(const Row & x)
 	{
 		push_back(x);
 		++row;
@@ -197,8 +211,7 @@ Matrix<T> Matrix<T>::invert() const
 
 	// Init inverse as ident matrix
 	for (unsigned i = 0; i < n; ++i)
-		for (unsigned j = 0; j < n; ++j)
-			if (i == j) inverse[i][j] = 1.0;
+		inverse[i][i] = 1.0;
 
 	for (unsigned i = 0; i < n; ++i)
 	{
@@ -236,24 +249,26 @@ Matrix<T> Matrix<T>::invert() const
 	return inverse;
 }
 
-//a[i][j] = sigma[k:0->x.row](x[k][i] * x[k][j])
 template <class T>
 Matrix<T> Matrix<T>::xtx() const
 {
 	unsigned DIM = col;
-	unsigned TRAINING_EXAMPLES = row;
 
 	Matrix<T> res(DIM);
 	for (unsigned n = 0; n < DIM; ++n)
-	{
-		for (unsigned q = 0; q < DIM; ++q)
+	{  
+		Row & res_row = res[n];
+		// We start from col n because xtx is symmetric (i.e. res[n][q] == res[q][n])
+		for (unsigned q = n; q < DIM; ++q)
 		{
-			T elem = 0.0;
-			for (unsigned m = 0; m < TRAINING_EXAMPLES; ++m)
+			T & res_n_q = res_row[q];
+			for (const_iterator it = begin(), itEnd = end(); it != itEnd; ++it)
 			{
-				elem += (*this)[m][n] * (*this)[m][q];
+				const Row & src_row = *it; 
+				res_n_q += src_row[n] * src_row[q];
 			}
-			res[n][q] = elem;
+			// Copy res[n][q] to res[q][n]
+			res[q][n] = res_n_q;
 		}
 	}
 
@@ -270,9 +285,17 @@ Matrix<T> & operator+=(Matrix<T> & m1, const Matrix<T> & m2)
 	if (m1.row != m2.row || m1.col != m2.col)
 		throw exception("not compatible for operator +=");
 
-	for (unsigned r = 0; r < m1.row; ++r)
-		for (unsigned c = 0; c < m1.col; ++c)
-			m1[r][c] += m2[r][c];
+	Matrix<T>::iterator rit1 = m1.begin(), rit1End = m1.end();
+	Matrix<T>::const_iterator rit2 = m2.begin();
+
+	for (; rit1 != rit1End; ++rit1, ++rit2)
+	{
+		Matrix<T>::Row::iterator cit1 = rit1->begin(), cit1End = rit1->end();
+		Matrix<T>::Row::const_iterator cit2 = rit2->begin();
+
+		for (; cit1 != cit1End; ++cit1, ++cit2)
+			(*cit1) += (*cit2);
+	}
 
 	return m1;
 }
