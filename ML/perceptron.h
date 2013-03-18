@@ -36,11 +36,9 @@ unsigned train_perceptron(
 		for (unsigned m = 0; m < x.row; ++m)
 		{
 			signed g = label(dot_product(w, x[m]));
-			signed error = target[m] - g; // set error -1 or 0 or 1
+			signed error = target[m] - g; // set error -1/0/1
 			if (error)
-			{
 				misclassified.push_back(make_pair(m, error)); 
-			}
 		}
 
 		++count;
