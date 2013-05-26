@@ -15,7 +15,7 @@
 
 #include "linear_solutions.h"
 #include "clustering.h"
-#include "matrix.h"
+#include "LA/matrix.h"
 
 using namespace std;
 

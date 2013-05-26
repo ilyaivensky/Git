@@ -10,7 +10,7 @@
 #ifndef _CLUSTERING_H
 #define _CLUSTERING_H
 
-#include "matrix.h"
+#include "LA/matrix.h"
 
 using namespace std;
 

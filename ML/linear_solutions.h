@@ -1,7 +1,7 @@
 #ifndef _LINEAR_SOULTIONS_H
 #define _LINEAR_SOLUTIONS_H
 
-#include "matrix.h"
+#include "LA/matrix.h"
 
 /**********************************************************
 * Pseudoinverse solution for linear weights

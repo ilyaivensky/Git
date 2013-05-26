@@ -13,7 +13,7 @@
 #ifndef _ERROR_H
 #define _ERROR_H
 
-#include "matrix.h"
+#include "LA/matrix.h"
 
 extern double e;
 
