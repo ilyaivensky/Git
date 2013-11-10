@@ -41,9 +41,9 @@ T square_dist(const vector<T> & v1, const vector<T> & v2)
 
 	return result;
 }
-
+	
 template <class T> 
-T dist(const vector<T> & v1, const vector<T> & v2)
+T euclidian_dist(const vector<T> & v1, const vector<T> & v2)
 {
 	return sqrt(square_dist(v1, v2));
 }
@@ -65,7 +65,7 @@ template <class T>
 ostream & operator<<(ostream & os, const vector<T> & v)
 {
 	for (unsigned i = 0; i < v.size(); ++i)
-		cerr << v[i] << "\t";
+		os << v[i] << "\t";
 
 	return os;
 }

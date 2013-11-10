@@ -105,7 +105,7 @@ T Matrix<T>::determinant() const
 	if (!is_square())
 		throw exception("determinant is not defined for non-square matrix"); 
 
-	T det = 0.0;
+	T det = 0;
 	for (unsigned i = 0; i < row; ++i)
 	{
 		for (unsigned r = 0, c = i; r < row; ++r, ++c)
@@ -129,7 +129,7 @@ T Matrix<T>::trace() const
 	if (!is_square())
 		throw exception("trace is not defined for non-square matrix");
 
-	T tr = 0.0;
+	T tr = 0;
 	for (unsigned i = 0; i < row; ++i)
 		tr += (*this)[i][i];
 

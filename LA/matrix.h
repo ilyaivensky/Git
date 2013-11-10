@@ -24,13 +24,13 @@ struct Matrix : public vector<vector<T> >
 {
 	typedef vector<T> Row;
 			
-	// Creates matrix row * col and initializes with 0.0
+	// Creates matrix row * col and initializes with 0
 	Matrix(unsigned row, unsigned col) : 
-		vector<Row>(row, Row(col, 0.0)), row(row), col(col) {}
+		vector<Row>(row, Row(col, 0)), row(row), col(col) {}
 
 	// Creates square matrix n * n and initializes with 0.0
  	Matrix(unsigned n) : 
-		vector<Row>(n, Row(n, 0.0)), row(n), col(n) {}
+		vector<Row>(n, Row(n, 0)), row(n), col(n) {}
 
 	// Creates outer product of v1 and v2
 	Matrix(const vector<T> & v1, const vector<T> & v2);
