@@ -3,8 +3,8 @@
 
 #include <cstdlib>
 #include <algorithm>
-#include "matrix.h"
-#include "vector_utils.h"
+#include "LA/matrix.h"
+#include "LA/vector_utils.h"
 
 extern double e;
 extern bool debug;
@@ -47,7 +47,7 @@ unsigned logistic_regression(const Matrix<T> & x, const Matrix<T> & y, vector<T>
 			swap(w, next_w);
 		}
 
-		T d = dist(w, prev_w);
+		T d = euclidian_dist(w, prev_w);
 
 		if (debug)
 			cerr << "Iter " << epoch << " distance " << d << endl;

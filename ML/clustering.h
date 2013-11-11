@@ -44,7 +44,7 @@ Matrix<T> k_means_clusterung(const Matrix<T> & x, unsigned k)
 			T min_dist = numeric_limits<T>::max();
 			for (unsigned c = 0; c < mu.size(); ++c)
 			{
-				T curr_dist = dist(x[n], mu[c]);
+				T curr_dist = euclidian_dist(x[n], mu[c]);
 				if (curr_dist < min_dist)
 				{
 					min_dist = curr_dist;
