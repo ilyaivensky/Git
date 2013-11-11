@@ -16,40 +16,48 @@
 #include "LA/Matrix.h"
 #include <ostream>
 #include <map>
+#include <set>
 
+template <class T>
 class KNN 
 {
 public:
-	KNN(unsigned k) : neighbours(k) {}
+	// Lazy training - just memorize
+	void train(const Matrix<T> & trainingData, const Matrix<unsigned> & trainingLabels)
+	{
+		trainedData_ = trainingData;
+		trainedLabels_ = trainingLabels;
+	}
 
-	template <class DataT> 
-	Matrix<unsigned> classify(const Matrix<DataT> & trainingData, const Matrix<unsigned> & trainingLabels,
-							  const Matrix<DataT> & testingData, const Matrix<unsigned> & testingLabels,
-							  unsigned numClasses, ostream & os) const;
+	Matrix<unsigned> classify(const Matrix<T> & data, unsigned numNN, 
+		ostream & os, 
+		const Matrix<unsigned> & refLabels = Matrix<unsigned>()) const;
+
 private:
-	unsigned neighbours;
+	Matrix<T> trainedData_;
+	Matrix<unsigned> trainedLabels_;
 };
 
-template <class DataT> 
-Matrix<unsigned> KNN::classify(const Matrix<DataT> & trainingData, const Matrix<unsigned> & trainingLabels,
-							  const Matrix<DataT> & testingData, const Matrix<unsigned> & testingLabels,
-							  unsigned numClasses, ostream & os) const
+template <class T> 
+Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, unsigned numNN,
+								  ostream & os, 
+								  const Matrix<unsigned> & refLabels) const
 {
-	Matrix<unsigned> confusion(numClasses, numClasses);
+	Matrix<unsigned> predictedLabels(data.row, 1);
 
-	// Foe each example ...
-	for (unsigned test = 0; test < testingData.row; ++test)
+	// For each example ...
+	for (unsigned m = 0; m < data.row; ++m)
 	{
 		// Step 1: find nearest members and their labels
 
-		vector<DataT> min_dist(this->neighbours, std::numeric_limits<DataT>::max());
-		vector<unsigned> nn(this->neighbours);
+		vector<T> min_dist(numNN, std::numeric_limits<T>::max());
+		vector<unsigned> nn(numNN);
 
-		for (unsigned train = 0; train < trainingData.row; ++train)
+		for (unsigned train = 0; train < trainedData_.row; ++train)
 		{
 			// Actually, we have to calculate Euclidian distance
 			// Instead, for efficiency reason, we calculate only a sum of quadrats, and skip a sqrt 
-			float dist = square_dist(trainingData[train], testingData[test]);
+			float dist = square_dist(trainedData_[train], data[m]);
 
 			// Find nearest neighbours
 			for (unsigned i = 0; i < nn.size(); ++i)
