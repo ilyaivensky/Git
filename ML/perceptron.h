@@ -1,7 +1,7 @@
 #ifndef _PERCEPTRON_H
 #define _PERCEPTRON_H
 
-#include "matrix.h"
+#include "LA/matrix.h"
 
 namespace PLA
 {
