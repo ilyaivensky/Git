@@ -22,14 +22,15 @@ template <class T>
 class KNN 
 {
 public:
-	// Lazy training - just memorize
+	// Lazy training - just memorize the data and labels
 	void train(const Matrix<T> & trainingData, const Matrix<unsigned> & trainingLabels)
 	{
 		trainedData_ = trainingData;
 		trainedLabels_ = trainingLabels;
 	}
 
-	Matrix<unsigned> classify(const Matrix<T> & data, unsigned numNN, 
+	Matrix<unsigned> classify(const Matrix<T> & data, 
+		unsigned numNN, 
 		ostream & os, 
 		const Matrix<unsigned> & refLabels = Matrix<unsigned>()) const;
 
@@ -39,10 +40,12 @@ private:
 };
 
 template <class T> 
-Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, unsigned numNN,
+Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, 
+								  unsigned numNN,
 								  ostream & os, 
 								  const Matrix<unsigned> & refLabels) const
 {
+	// Column vector of predictions
 	Matrix<unsigned> predictedLabels(data.row, 1);
 
 	// For each example ...
@@ -53,25 +56,30 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, unsigned numNN,
 		vector<T> min_dist(numNN, std::numeric_limits<T>::max());
 		vector<unsigned> nn(numNN);
 
-		for (unsigned train = 0; train < trainedData_.row; ++train)
+		for (unsigned tr = 0; tr < trainedData_.row; ++tr)
 		{
 			// Actually, we have to calculate Euclidian distance
-			// Instead, for efficiency reason, we calculate only a sum of quadrats, and skip a sqrt 
-			float dist = square_dist(trainedData_[train], data[m]);
+			// Instead, for efficiency reason, we calculate only a sum of quadrats and skip a sqrt
+			// This optimization is transparent for results because sqrt is monotone ascending function 
+			float dist = square_dist(trainedData_[tr], data[m]);
 
-			// Find nearest neighbours
+			// Find nearest neighbours using priority queue
 			for (unsigned i = 0; i < nn.size(); ++i)
 			{
-				if (dist < min_dist[i])
+				if (dist >= min_dist[i])
+					continue;
+
+				// Current element is closer than any other element in the queue
+				// Shift all of them 1 position up 
+				for (unsigned j = i + 1; j < nn.size(); ++j)
 				{
-					if (i < nn.size() - 1)
-					{
-						min_dist[i+1] = min_dist[i];
-						nn[i+1] = nn[0];
-					}
-					min_dist[i] = dist;
-					nn[i] = trainingLabels[train][0];
+					min_dist[j] = min_dist[j-1];
+					nn[j] = nn[j-1];
 				}
+					
+				// ...and insert current element
+				min_dist[i] = dist;
+				nn[i] = trainedLabels_[tr][0];
 			}
 		}
 
@@ -79,7 +87,7 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, unsigned numNN,
 
 		// Count all predicted labels
 		map<unsigned, unsigned> predicted;
-		for (unsigned i = 0; i <  this->neighbours; ++i)
+		for (unsigned i = 0; i < numNN; ++i)
 			predicted[nn[i]] += 1;
 
 		// Find the most popular prediction
@@ -92,15 +100,15 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data, unsigned numNN,
 				maxPredictions = it->second; label = it->first;
 		}
 
-		// Step 3: Update confusion matrix
-		confusion[label][testingLabels[test][0]] += 1;
-		
-		// Report
-		os << "ID: " << test << " Pred: " << label << ", corr: " << testingLabels[test][0] 
-			<< " NNs (sorted): " << nn << endl; 
-	}
+		predictedLabels[m][0] = label;
 
-	return confusion;
+		if (!refLabels.empty())
+			os << "ID: " << m << " Pred: " << label << " Corr: " << refLabels[m] << " NNs: " << nn << endl;
+		else
+			os << "ID: " << m << " Pred: " << label << " NNs: " << nn << endl;
+	}
+	
+	return predictedLabels;
 }
 
 #endif
