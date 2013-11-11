@@ -60,15 +60,20 @@ struct Matrix : public vector<vector<T> >
 	// The same as above, but we transpose other
 	Matrix multiply_by_transposed(const Matrix & other) const;
 
+	// Creates transformed variant of self according to transform function
 	Matrix get_transformed(vector<T> (*t)(const vector<T> &)) const;
+
+	// Transforms according to transform function
 	void transform_self(vector<T> (*t)(const vector<T> &));
 
-	// Creates binary matrix according to the label function
+	// Creates binary matrix according to the label function 
+	// (e.g. 1:0 or 1:-1) for positive and negative values from 'm'
 	static Matrix binary(const Matrix & m, signed (*label)(const T &));
 
 	void scale(T lb, T ub);
 
-	static Matrix<T> diag(unsigned n, T lambda); 
+	// Creates diagonal matrix 
+	static Matrix<T> diag(unsigned size, T value); 
 
 	bool is_square() const { return row == col; }
 
