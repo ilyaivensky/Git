@@ -143,7 +143,8 @@ Matrix<T> Matrix<T>::get_transformed(vector<T> (*t)(const vector<T> &)) const
 		return *this;
 
 	Matrix transformed(this->row, 0);
-	for (const_iterator it = begin(), itEnd = end(), itTr = transformed.begin(); it != itEnd; ++it)
+	iterator itTr = transformed.begin();
+	for (const_iterator it = begin(), itEnd = end(); it != itEnd; ++it, ++itTr)
 		*itTr = t(*it);
 
 	transformed.col = transformed[0].size();
