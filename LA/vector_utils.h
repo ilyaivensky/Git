@@ -65,7 +65,7 @@ template <class T>
 ostream & operator<<(ostream & os, const vector<T> & v)
 {
 	for (unsigned i = 0; i < v.size(); ++i)
-		os << v[i] << "\t";
+		os << v[i] << " ";
 
 	return os;
 }
