@@ -44,6 +44,15 @@ struct Matrix : public vector<vector<T> >
 
 	bool empty() const { return row == 0; } 
 
+	void resize(unsigned resized_row, unsigned resized_col)
+	{
+		vector<Row>::resize(resized_row, Row(col));
+		row = resized_row;
+		for (vector<Row>::iterator it = begin(), itEnd = end(); it != itEnd; ++it)
+			it->resize(resized_col);
+		col = resized_col;
+	}
+
 	void add_row(const Row & x)
 	{
 		push_back(x);
