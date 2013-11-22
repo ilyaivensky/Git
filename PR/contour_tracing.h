@@ -9,6 +9,12 @@ Matrix<T> scan_contours(const Matrix<T> & img);
 template <class T>
 Matrix<T> trace_contours(const Matrix<T> & img);
 
+/******************************************************************************
+* 
+* IMPLEMENTATIONS
+*
+*******************************************************************************/
+
 template <class T>
 Matrix<T> scan_contours(const Matrix<T> & m)
 {
