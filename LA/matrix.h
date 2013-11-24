@@ -10,12 +10,11 @@
  *   
  */
 
-#ifndef _MATRIX_H
-#define	_MATRIX_H
+#ifndef _MATRIX_H_
+#define	_MATRIX_H_
 
 #include <vector>
 #include <limits>
-#include "ML/random.h"
 
 using namespace std;
 
@@ -38,8 +37,12 @@ struct Matrix : public vector<vector<T> >
 	// Creates empty matrix
 	Matrix() : row(0), col(0) {}
 
+	// Random initialization 
+	// Include "ML/random.h" before including this file (matrix.h)
+	// Include "ML/random.h" is not needed if those functions are not used
     void random_init();
 	void random_init_0();
+
 	void interactive_init();
 
 	bool empty() const { return row == 0; } 
