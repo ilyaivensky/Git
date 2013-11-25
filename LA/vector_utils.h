@@ -1,10 +1,10 @@
-#ifndef _VECTOR_UTILS_H
-#define _VECTOR_UTILS_H
+#ifndef _VECTOR_UTILS_H_
+#define _VECTOR_UTILS_H_
 
 #include <vector>
 #include <cstdlib>
 
-#include "matrix.h"
+#include "LA/matrix.h"
 
 using namespace std;
 
@@ -62,10 +62,18 @@ T norm(const vector<T> & v, T p = 2.0)
 }
 
 template <class T>
+void make_vector_set(vector<T> & v)
+{
+	sort(v.begin(), v.end());
+	vector<T>::iterator itEnd = unique(v.begin(), v.end());
+	v.erase(itEnd, v.end());
+}
+
+template <class T>
 ostream & operator<<(ostream & os, const vector<T> & v)
 {
-	for (unsigned i = 0; i < v.size(); ++i)
-		os << v[i] << " ";
+	for (vector<T>::const_iterator it = v.begin(), itEnd = v.end(); it != itEnd; ++it)
+		os << *it << " ";
 
 	return os;
 }
