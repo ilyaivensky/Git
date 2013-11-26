@@ -1,5 +1,17 @@
-#ifndef _SVM_FEATURES_FILE_H_
-#define _SVM_FEATURES_FILE_H_
+/*                                                                 -*- C++ -*-
+ * File: svm_data_file.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Nov 26, 2013
+ *
+ * Description:
+ *   Utility to dump features into SVM supported data file
+ *   
+ */
+
+#ifndef _SVM_DATA_FILE_H_
+#define _SVM_DATA_FILE_H_
 
 #include <fstream>
 #include <iostream>
@@ -7,7 +19,7 @@
 #include "LA/matrix.h"
 
 template <class D, class L>
-void write_SVM_feature_file(const std::string & fileName, Matrix<D> & features, vector<L> & labels)
+void write_SVM_data_file(const std::string & fileName, Matrix<D> & features, vector<L> & labels)
 {
 	std::cerr << "Writing " << fileName << std::endl;
 	// Open output file
