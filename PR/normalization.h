@@ -1,3 +1,15 @@
+/*                                                                 -*- C++ -*-
+ * File: normalozation.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Oct, 2013
+ *
+ * Description:
+ *   Utilities to normalize binary images
+ *   
+ */
+
 #ifndef _NORMALIZATION_H_
 #define _NORMALIZATION_H_
 
