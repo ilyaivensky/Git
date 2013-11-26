@@ -23,7 +23,7 @@ using namespace std;
 
 namespace MNIST {
 
-uint32_t read32(fstream & fs)
+static uint32_t read32(fstream & fs)
 {
 	uint8_t buff[4];
 	fs.read(reinterpret_cast<char*>(&buff), sizeof(buff));
@@ -36,7 +36,7 @@ uint32_t read32(fstream & fs)
 	return retval;
 }
 
-inline uint8_t read8(fstream & fs)
+static inline uint8_t read8(fstream & fs)
 {
 	uint8_t val;
 	fs.read(reinterpret_cast<char*>(&val), sizeof(val));
