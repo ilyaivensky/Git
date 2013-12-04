@@ -75,25 +75,14 @@ int read_mnist(const std::string & imagesFile, const std::string & labelsFile,
 	if (numImgs != numLabels)
 		throw exception("numImgs != numLabels");
 
-#if 1
 	cerr << "image file, magic = "
 		<< (int) magicFS << ", numImgs = " << (int) numImgs 
 		<< ", numRow = " << (int) numRow << ", numCol = " << numCol << endl;
 	
 	cerr << "labels file, magic = "
 		<< (int) magicLS << ", numLabels = " << (int) numLabels << endl;
-#endif
-/*
-	// Open output files
-	vector<ofstream> ofs(10);
-	for (unsigned i = 0; i < ofs.size(); ++i)
-	{
-		stringstream str;
-		str << outputFile << i << ".txt";
-		ofs[i].open(str.str(), 'w');
-	}
-	*/
-	vector<unsigned> counters(10, 0);
+
+	vector<unsigned> counters(10);
 
 	images.resize(std::min(numImgs, maxImgs), Image(numRow, numCol));
 	labels.resize(std::min(numImgs, maxImgs), -1);
@@ -108,27 +97,24 @@ int read_mnist(const std::string & imagesFile, const std::string & labelsFile,
 			for (unsigned c = 0; c < numCol; ++c)
 			{
 				uint8_t val = read8(ifs);
-				img[r][c] = val ? 1 : 0;
+				img[r][c] = val;;
 			}
 		}
 
 		int label = read8(lfs);
 		*itLbls = label;
 
-		//ofs[label] << img << endl;
 		counters[label] += 1;
-		//cerr << label << endl;
-
+	
 		if ((i % 1000) == 0)
 			cerr << i << endl;
 	}
-/*
-	for (unsigned i = 0; i < ofs.size(); ++i)
-	{
-		ofs[i].close();
+
+	// Print distriburion of labels
+	for (unsigned i = 0; i < counters.size(); ++i)
 		cerr << "Total " << i << ": " << counters[i] << endl;
-	}
-	*/
+	
+
 	return 0;
 }
 
