@@ -34,7 +34,7 @@ T square_dist(const vector<T> & v1, const vector<T> & v2)
 	if (v1.size() != v2.size())
 		throw exception("dist: v1.size() != v2.size()");
 
-	T result = 0.0;
+	T result = 0;
 	for (vector<T>::const_iterator it1 = v1.begin(), it1End = v1.end(), 
 		it2 = v2.begin(); it1 != it1End; ++it1, ++it2)
 		result += pow(*it1 - *it2, 2);
