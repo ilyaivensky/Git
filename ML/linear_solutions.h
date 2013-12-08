@@ -9,9 +9,9 @@
 * (implements left inverse)
 ***********************************************************/
 template <class T>
-Matrix<T> linear_pseudoinverse_solution(const Matrix<T> & x, const Matrix<T> & y, T regularization = 0.0)
+Matrix<T> linear_pseudoinverse_solution(const Matrix<T> & data, const Matrix<T> & labels, T regularization = 0.0)
 {
-	Matrix<T> xtx = gram(x);
+	Matrix<T> xtx = gram(data);
 	if (regularization != 0.0)
 	{
 		Matrix<T> reg = Matrix<T>::diag(xtx.nrow(), regularization);
@@ -19,8 +19,8 @@ Matrix<T> linear_pseudoinverse_solution(const Matrix<T> & x, const Matrix<T> & y
 	}
 	Matrix<T> inverted = inv(xtx);
 	
-	Matrix<T> h = inverted.multiply_by_transposed(x);
-	Matrix<T> w = h * y;
+	Matrix<T> hypothesis = inverted.multiply_by_transposed(data);
+	Matrix<T> w = hypothesis * labels;
 
 	return w;
 }
