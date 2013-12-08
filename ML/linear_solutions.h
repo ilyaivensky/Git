@@ -1,3 +1,12 @@
+/*                                                                 -*- C++ -*-
+ * File: linear_solutions.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Mar, 2013
+ *   
+ */
+
 #ifndef _LINEAR_SOULTIONS_H
 #define _LINEAR_SOLUTIONS_H
 
