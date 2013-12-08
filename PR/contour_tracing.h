@@ -1,10 +1,23 @@
+/*                                                                 -*- C++ -*-
+ * File: contour_tracing.h
+ * 
+ * Author: Ilya Ivensky
+ * 
+ * Created on: Oct, 2013
+ *
+ * Description:
+ *   Implements various algorithms of extracting contours
+ *   
+ */
+
+
 #ifndef _CONTOUR_TRACING_H_
 #define _CONTOUR_TRACING_H_
 
 #include "LA/matrix.h"
 
-template <class T>
-Matrix<T> scan_contours(const Matrix<T> & img);
+template <class Image>
+Image scan_contours(const Image & img);
 
 template <class T>
 Matrix<T> trace_contours(const Matrix<T> & img);
@@ -15,54 +28,54 @@ Matrix<T> trace_contours(const Matrix<T> & img);
 *
 *******************************************************************************/
 
-template <class T>
-Matrix<T> scan_contours(const Matrix<T> & m)
+template <class Image>
+Image scan_contours(const Image & m)
 {
-	Matrix<T> contour(m.row, m.col);
+	Image contour(m.nrow(), m.ncol());
 	
 	// Scan left-right each row
-	for (unsigned i = 0; i < m.row; ++i)
+	for (unsigned i = 0; i < m.nrow(); ++i)
 	{	
-		unsigned state = 0;
-		for (unsigned j = 0; j < m.col; ++j)
+		bool state = false;
+		for (unsigned j = 0; j < m.ncol(); ++j)
 		{
-			if (m[i][j] != state)
+			if (bool(m[i][j]) != state)
 			{
 				// Record new state
-				state = m[i][j];
+				state = bool(m[i][j]);
 				if (m[i][j])
 				{
 					// Add contour for the current field
-					contour[i][j] = m[i][j];
+					contour[i][j] = '*';
 				}	
 				else
 				{
 					// Add contour for the field on the prev col, same row
-					contour[i][j - 1] = m[i][j - 1];
+					contour[i][j - 1] = '*';
 				}
 			}
 		}
 	}
 
 	// Scan up-down each col
-	for (unsigned j = 0; j < m.col; ++j)
+	for (unsigned j = 0; j < m.ncol(); ++j)
 	{	
-		unsigned state = 0;
-		for (unsigned i = 0; i < m.row; ++i)
+		bool state = false;
+		for (unsigned i = 0; i < m.nrow(); ++i)
 		{
-			if (m[i][j] != state)
+			if (bool(m[i][j]) != state)
 			{
 				// Record new state
-				state = m[i][j];
+				state = bool(m[i][j]);
 				if (m[i][j])
 				{
 					// Add contour for the current field
-					contour[i][j] = m[i][j];
+					contour[i][j] = '*';
 				}	
 				else
 				{
 					// Add contour for the field on the prev row, same col
-					contour[i - 1][j] = m[i - 1][j];
+					contour[i - 1][j] = '*';
 				}
 			}
 		}
@@ -74,7 +87,7 @@ Matrix<T> scan_contours(const Matrix<T> & m)
 template <class T>
 Matrix<T> bug_walk(const Matrix<T> & m, signed start_i, signed start_j)
 {
-	Matrix<T> contour(m.row, m.col);
+	Matrix<T> contour(m.nrow(), m.ncol());
 
 	enum Directions {
 		NORTH = 0,
@@ -114,7 +127,7 @@ Matrix<T> bug_walk(const Matrix<T> & m, signed start_i, signed start_j)
 		}
 
 		// Check whether it is a black pixel or white. Treat out-of-range pixels as white
-		if (i >= 0 && i < (signed)m.row && j >= 0 && j < (signed)m.col && m[i][j])
+		if (i >= 0 && i < (signed)m.nrow() && j >= 0 && j < (signed)m.ncol() && m[i][j])
 		{
 			// This is a black pixel. Record it
 			contour[i][j] = m[i][j];
@@ -143,14 +156,14 @@ template <class T>
 Matrix<T> trace_contours(const Matrix<T> & m)
 {
 	// Scan from bottom to top and from left to right to find a black pixel to start bug_walk from it
-	signed i = m.row, j = 0;
+	signed i = m.nrow(), j = 0;
 	for (; i > 0; --i)
-		for (j = 0; j < (signed)m.col; ++j)
+		for (j = 0; j < (signed)m.ncol(); ++j)
 			if (m[i - 1][j])
-				return bug_walk(m, --i, j, fname);
+				return bug_walk(m, --i, j);
 
 	// No black pixel was found. Return empty contour
-	return Matrix<T>(m.row, m.col);
+	return Matrix<T>(m.nrow(), m.ncol());
 }
 
 #endif
