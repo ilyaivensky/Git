@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdlib>
 
-#include "LA/matrix.h"
+//#include "LA/matrix.h"
 
 using namespace std;
 
@@ -67,6 +67,12 @@ void make_vector_set(vector<T> & v)
 	sort(v.begin(), v.end());
 	vector<T>::iterator itEnd = unique(v.begin(), v.end());
 	v.erase(itEnd, v.end());
+}
+
+template <class T>
+T operator * (const vector<T> & v1, const vector<T> & v2)
+{
+	return inner_product(v1, v2);
 }
 
 template <class T>
