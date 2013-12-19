@@ -78,9 +78,7 @@ T operator * (const vector<T> & v1, const vector<T> & v2)
 template <class T>
 ostream & operator<<(ostream & os, const vector<T> & v)
 {
-	for (vector<T>::const_iterator it = v.begin(), itEnd = v.end(); it != itEnd; ++it)
-		os << *it << " ";
-
+	std::copy(v.begin(), v.end(), ostream_iterator<T>(os, " "));
 	return os;
 }
 

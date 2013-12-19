@@ -24,22 +24,23 @@ class Matrix : public vector<vector<T> >
 public:
 	typedef vector<T> Row;
 
+	typedef vector<Row> Super;
+
+	Matrix() {};
+	
 	// Creates matrix row * col and initializes with val
 	Matrix(unsigned row, unsigned col, T val = T()) : 
-		vector<Row>(row, Row(col, val)), row_(row), col_(col) {}
+		vector<Row>(row, Row(col, val)) {}
 
 	// Creates square matrix n * n and initializes with default value of T
  	Matrix(unsigned n) : 
-		vector<Row>(n, Row(n)), row_(n), col_(n) {}
+		vector<Row>(n, Row(n)) {}
 
 	// Creates outer product of v1 and v2
 	Matrix(const vector<T> & v1, const vector<T> & v2);
 
-	// Creates empty matrix
-	Matrix() : row_(0), col_(0) {}
-
-	unsigned nrow() const { return row_; }
-	unsigned ncol() const { return col_; }
+	unsigned nrow() const { return size(); }
+	unsigned ncol() const { return size() ? front().size() : 0; }
 
 	// Random initialization 
 	// Include "ML/random.h" before including this file (matrix.h)
@@ -49,25 +50,19 @@ public:
 
 	void interactive_init();
 
-	bool empty() const { return row_ == 0; } 
-
 	void resize(unsigned row, unsigned col)
 	{
 		vector<Row>::resize(row, Row(col));
-		row_ = row;
 		for (vector<Row>::iterator it = begin(), itEnd = end(); it != itEnd; ++it)
 			it->resize(col);
-		col_ = col;
 	}
 
 	void add_row(const Row & x)
 	{
-		if (!row_) col_ = x.size();
-		else if (x.size() != col_)
+		if (!empty() && front().size() != x.size())
 			throw exception("Matrix: inconsistent num of columns");
 
 		push_back(x);
-		++row_;
 	}
 	
 	// The same as above, but we transpose other
@@ -84,7 +79,7 @@ public:
 	template <class B>
 	Matrix<B> get_binary(B (*label)(const T &)) const
 	{
-		Matrix<B> res(row_, col_);
+		Matrix<B> res(nrow(), ncol());
 			
 		const_iterator itRow = begin(), itRowEnd = end();
 		Matrix<B>::iterator resRowIt = res.begin();
@@ -108,7 +103,7 @@ public:
 	// Creates diagonal matrix 
 	static Matrix diag(unsigned size, T value); 
 
-	bool is_square() const { return row_ == col_; }
+	bool is_square() const { return nrow() == ncol(); }
 
 	Matrix operator * (const Matrix & m) const;
 	Matrix operator * (const vector<T> & v) const;
@@ -122,14 +117,24 @@ public:
 
 	Matrix operator - (const Matrix & m) const;
 	Matrix & operator -= (const Matrix & m);
-
-private:
-	unsigned row_;
-	unsigned col_;
 };
 
 template <class T>
 ostream & operator << (ostream & os, const Matrix<T> & m);
+
+// Creates bi-vector
+template <class T>
+Matrix<T> operator ^ (const vector<T> & v1, const vector<T> & v2);
+
+template <class T>
+Matrix<T> operator ^ (const Matrix<T> & m, const vector<T> & v);
+
+template <class T>
+Matrix<T> operator ^ (const vector<T> & v, const Matrix<T> & m);
+
+template <class T>
+Matrix<T> operator ^ (const Matrix<T> & m1, const Matrix<T> & m2);
+
 
 #include "matrix_impl.h"
 

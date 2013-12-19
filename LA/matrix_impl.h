@@ -7,6 +7,7 @@
  */
 
 #include "vector_utils.h"
+#include <boost/assign/list_of.hpp>
 
 template <class T>
 Matrix<T>::Matrix(const vector<T> & v1, const vector<T> & v2) :
@@ -71,14 +72,14 @@ template <class T>
 void Matrix<T>::random_init() 
 {
 	for (iterator it = begin(), itEnd = end(); it != itEnd; ++it)
-		(*it) = random_example<T>(col_);
+		(*it) = random_example<T>(ncol());
 }
 
 template <class T>
 void Matrix<T>::random_init_0() 
 {
 	for (iterator it = begin(), itEnd = end(); it != itEnd; ++it)
-		(*it) = random_example_0<T>(col_);
+		(*it) = random_example_0<T>(ncol());
 }
 
 template <class T>
@@ -87,12 +88,10 @@ Matrix<T> Matrix<T>::get_transformed(vector<T> (*t)(const vector<T> &)) const
 	if (*t == 0)
 		return *this;
 
-	Matrix transformed(this->row, 0);
+	Matrix transformed(nrow(), 0);
 	iterator itTr = transformed.begin();
 	for (const_iterator it = begin(), itEnd = end(); it != itEnd; ++it, ++itTr)
 		*itTr = t(*it);
-
-	transformed.col_ = transformed[0].size();
 
 	return transformed;
 }
@@ -103,17 +102,15 @@ void Matrix<T>::transform_self(vector<T> (*t)(const vector<T> &))
 	if (*t == 0)
 		return;
 
-	for (vector<vector<T> >::iterator it = this->begin(), itEnd = this->end(); it != itEnd; ++it)
+	for (vector<vector<T> >::iterator it = begin(), itEnd = end(); it != itEnd; ++it)
 		*it = t(*it);
-
-	col_ = (*this)[0].size();
 }
 
 // X(m,n), Y(m,n) - treated as transposed
 template <class T>
 Matrix<T> Matrix<T>::multiply_by_transposed(const Matrix<T> & other) const
 {
-	Matrix<T> res(this->nrow(), other.nrow());
+	Matrix<T> res(nrow(), other.nrow());
 	for (unsigned m = 0; m < this->nrow(); ++m)
 	{
 		for (unsigned n = 0; n < other.nrow(); ++n) // we transpose other
@@ -241,10 +238,61 @@ Matrix<T> & Matrix<T>::operator -= (const Matrix<T> & m2)
 }
 
 template <class T> 
-ostream & operator<<(ostream & os, const Matrix<T> & m)
+ostream & operator << (ostream & os, const Matrix<T> & m)
 {
 	for (Matrix<T>::const_iterator it = m.begin(), itEnd = m.end(); it != itEnd; ++it)
 		os << *it << endl;
-     
+
 	return os;
+}
+
+template <class T>
+Matrix<T> operator ^ (const vector<T> & v1, const vector<T> & v2)
+{
+	if (v1.size() != v2.size())
+		throw exception("Incompatible vectors"); 
+
+	Matrix<T> res;
+
+	for (vector<T>::const_iterator itV1 = v1.begin(), itV2 = v2.begin(), 
+		itVEnd = v1.end(); itV1 != itVEnd; ++itV1, ++itV2)
+	{
+		res.add_row(boost::assign::list_of(*itV1)(*itV2));
+	}
+
+	return res;
+}
+
+template <class T>
+Matrix<T> operator ^ (const Matrix<T> & m, const vector<T> & v)
+{
+	if (m.size() != v.size())
+		throw exception("Incompatible sizes"); 
+
+	Matrix<T> res(m);
+
+	vector<T>::const_iterator itV = v.begin();
+	for (Matrix<T>::iterator itM = m.begin(), itMEnd = m.end(); itM != itMEnd; ++itM, ++itV)
+		itM->push_back(*itV);
+
+	return res;
+}
+
+template <class T>
+Matrix<T> operator ^ (const vector<T> & v, const Matrix<T> & m)
+{
+	if (m.size() != v.size())
+		throw exception("Incompatible sizes"); 
+
+	Matrix<T> res(v.size(), 0);
+	vector<T>::const_iterator itV = v.begin();
+	Matrix<T>::const_iterator itM = m.begin();
+	for (Matrix<T>::iterator itRes = res.begin(), itResEnd = res.end(); itRes != itResEnd; ++itRes, ++itV, ++itM)
+	{
+		itRes->reserve(m.ncol() + 1);
+		itRes->push_back(*itV);
+		itRes->insert(itRes->end(), itM->begin(), itM->end()); 
+	}
+
+	return res;
 }
