@@ -39,6 +39,13 @@ public:
 	// Creates outer product of v1 and v2
 	Matrix(const vector<T> & v1, const vector<T> & v2);
 
+	// Creates matrix with identical rows 
+	Matrix(const vector<T> & row, unsigned nrow) :
+		vector<Row>(nrow, row) {}
+
+	// Creates matrix with identical columns
+	Matrix(unsigned ncol, const vector<T> & col);
+
 	unsigned nrow() const { return size(); }
 	unsigned ncol() const { return size() ? front().size() : 0; }
 
@@ -101,7 +108,7 @@ public:
 	void scale(T lower_bound, T upper_bound);
 
 	// Creates diagonal matrix 
-	static Matrix diag(unsigned size, T value); 
+	static Matrix diag(unsigned size, const T & value); 
 
 	bool is_square() const { return nrow() == ncol(); }
 

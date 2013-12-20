@@ -28,6 +28,16 @@ Matrix<T> inv(const Matrix<T> & m);
 template <class T>
 Matrix<T> gram(const Matrix<T> & x);
 
+// Returns vector of column medians
+template <class T>
+vector<T> medc(const Matrix<T> & m);
+
+// Returns deviation scores matrix, where each element of
+// column vector is deviation score of corresponding 
+// element in x from the mean of its column in x
+template <class T>
+Matrix<T> dev(const Matrix<T> & x);
+
 // Returns covariance matrix
 template <class T>
 Matrix<T> cov(const Matrix<T> & m);

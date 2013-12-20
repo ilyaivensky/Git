@@ -67,10 +67,24 @@ Matrix<T> gram(const Matrix<T> & m)
 }
 
 template <class T>
+vector<T> medc(const Matrix<T> & m)
+{
+	Matrix<T> k(1, m.nrow(), 1);
+	Matrix<T> res(k * m);
+	res /= static_cast<T>(m.nrow());
+	return res[0];
+}
+
+template <class T>
+Matrix<T> dev(const Matrix<T> & m)
+{
+	return m - Matrix<T>(medc(m), m.nrow());
+}
+
+template <class T>
 Matrix<T> cov(const Matrix<T> & m)
 {
-	Matrix<T> k(m.nrow(), m.nrow(), 1.0 / m.nrow());
-	Matrix<T> deviation = m - k * m;
+	Matrix<T> deviation = dev(m);
 	Matrix<T> cov = gram(deviation);
 	cov /= static_cast<T>(m.nrow());
 	return cov;

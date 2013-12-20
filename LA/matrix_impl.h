@@ -25,11 +25,19 @@ Matrix<T>::Matrix(const vector<T> & v1, const vector<T> & v2) :
 }
 
 template <class T>
-Matrix<T> Matrix<T>::diag(unsigned n, T lambda)
+Matrix<T>::Matrix(unsigned ncol, const vector<T> & col)
+{
+	reserve(ncol);
+	for (vector<T>::const_iterator it = col.begin(), itEnd = col.end(); it != itEnd; ++it)
+		push_back(Row(ncol, *it));
+}
+
+template <class T>
+Matrix<T> Matrix<T>::diag(unsigned n, const T & val)
 {
 	Matrix<T> r(n);
 	for (unsigned i = 0; i < n; ++i)
-		r[i][i] = lambda;
+		r[i][i] = val;
 
 	return r;
 }
@@ -173,7 +181,11 @@ Matrix<T> & Matrix<T>::operator *= (const T & t)
 template <class T>
 Matrix<T> & Matrix<T>::operator /= (const T & t)
 {
-	return operator *= (static_cast<T>(1) / t);
+	for (Matrix<T>::iterator itRow = this->begin(), itRowEnd = this->end(); itRow != itRowEnd; ++itRow)
+		for (Matrix<T>::Row::iterator itCol = itRow->begin(), itColEnd = itRow->end(); itCol != itColEnd; ++itCol)
+			(*itCol) /= t;
+
+	return *this;
 }
 
 template <class T>
