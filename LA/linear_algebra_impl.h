@@ -23,27 +23,28 @@ T tr(const Matrix<T> & m)
 template <class T>
 T det(const Matrix<T> & m)
 {
-	if (!m.is_square())
+	if (!is_square(m))
 		throw exception("determinant is not defined for non-square matrix"); 
 
-	T det = 0;
-	for (unsigned i = 0; i < m.nrow(); ++i)
+	switch (m.nrow())
 	{
-		for (unsigned r = 0, c = i; r < m.nrow(); ++r, ++c)
-		{
-			if (c == m.nrow()) c = 0;
-			det += m[r][c];
-		}
-
-		for (unsigned r = 0, c = m.nrow() - i; r < m.nrow(); ++r, --c)
-		{
-			if (c == 0) c = m.nrow();
-			det -= m[r][c - 1];
-		}
+	case 0:
+		return 0;
+	case 1:
+		return m[0][0];
+	case 2:
+		return m[0][0] * m[1][1] - m[0][1] * m[1][0];
+	default:
+		break;
 	}
-	return det;
-}
 
+	T d = 0;
+	for (unsigned j = 0; j < m.nrow(); ++j)
+		d += static_cast<T>(pow(-1, j + 2)) * m[0][j] * det(m.minor(0, j));
+
+	return d;
+}
+		
 template <class T>
 Matrix<T> gram(const Matrix<T> & m)
 {
@@ -93,8 +94,8 @@ Matrix<T> cov(const Matrix<T> & m)
 template <class T>
 Matrix<T> inv(const Matrix<T> & m)
 {
-	if (!m.is_square())
-		throw exception("cannot inverse non-square matrix\n");
+	if (!is_square(m) || det(m) == 0)
+		throw exception("cannot inverse singular matrix\n");
 
 	Matrix<T> matrix(m);
 	unsigned n = matrix.size();

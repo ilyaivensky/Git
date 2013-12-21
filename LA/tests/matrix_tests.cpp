@@ -79,6 +79,47 @@ void inverse_test2()
 	BOOST_REQUIRE(a * a1 == Matrix<float>::diag(2, 1.0));
 }
 
+void determinant3_test()
+{
+	Matrix<float> a(3, 3);
+	a[0][0] = -2, a[0][1] = 2, a[0][2] = -3;
+	a[1][0] = -1, a[1][1] = 1, a[1][2] =  3;
+	a[2][0] =  2, a[2][1] = 0, a[2][2] = -1;
+
+	BOOST_REQUIRE(det(a) == 18);
+}
+
+void determinant4_test()
+{
+	Matrix<int> a(4, 4);
+	a[0][0] =  1, a[0][1] =  2, a[0][2] =  3, a[0][3] =  4;
+	a[1][0] =  5, a[1][1] =  6, a[1][2] =  7, a[1][3] =  8;
+	a[2][0] =  9, a[2][1] = 10, a[2][2] = 11, a[2][3] = 12;
+	a[3][0] = 13, a[3][1] = 14, a[3][2] = 15, a[3][3] = 16;
+
+	BOOST_REQUIRE(det(a) == 0);
+}
+
+void linear_solution_test()
+{
+	Matrix<float> a(3, 3);
+	a[0][0] = 1, a[0][1] = 2, a[0][2] = 2;
+	a[1][0] = 2, a[1][1] = 2, a[1][2] = 2;
+	a[2][0] = 2, a[2][1] = 2, a[2][2] = 1;
+
+	Matrix<float> y(3, 1);
+	y[0][0] = 1;
+	y[1][0] = 2;
+	y[2][0] = 3;
+
+	Matrix<float> x(3, 1);
+	x[0][0] =  1;
+	x[1][0] =  1;
+	x[2][0] = -1;
+	
+	BOOST_REQUIRE(linear_solution(a, y) == x);
+}
+
 boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *argv[])
 {
     test_suite* test = BOOST_TEST_SUITE("Matrix test suite");
@@ -87,6 +128,9 @@ boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *ar
 	test->add(BOOST_TEST_CASE(&covariance_test));
 	test->add(BOOST_TEST_CASE(&inverse_test));
 	test->add(BOOST_TEST_CASE(&inverse_test2));
+	test->add(BOOST_TEST_CASE(&determinant3_test));
+	test->add(BOOST_TEST_CASE(&determinant4_test));
+	test->add(BOOST_TEST_CASE(&linear_solution_test));
 
     return test;
 }

@@ -25,6 +25,33 @@ Matrix<T>::Matrix(const vector<T> & v1, const vector<T> & v2) :
 }
 
 template <class T>
+Matrix<T> Matrix<T>::minor(unsigned r, unsigned c) const
+{
+	if (r >= nrow() || c >= ncol())
+		throw exception("minor: out of range");
+
+	Matrix<T> m(nrow() - 1, ncol() - 1);
+	for (unsigned i = 0, mi = 0; i < nrow(); ++i)
+	{
+		if (i == r) continue;
+
+		const Row & row = (*this)[i];
+		Row & mrow = m[mi];
+
+		for (unsigned j = 0, mj = 0; j < ncol(); ++j)
+		{
+			if (j == c) continue;
+
+			mrow[mj] = row[j];
+			++mj;
+		}
+		++mi;
+	}
+
+	return m;
+}
+
+template <class T>
 Matrix<T>::Matrix(unsigned ncol, const vector<T> & col)
 {
 	reserve(ncol);

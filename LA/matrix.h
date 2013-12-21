@@ -110,7 +110,8 @@ public:
 	// Creates diagonal matrix 
 	static Matrix diag(unsigned size, const T & value); 
 
-	bool is_square() const { return nrow() == ncol(); }
+	// Returns minor version of m (removed row r and col c)
+	Matrix minor(unsigned r, unsigned c) const;
 
 	Matrix operator * (const Matrix & m) const;
 	Matrix operator * (const vector<T> & v) const;
