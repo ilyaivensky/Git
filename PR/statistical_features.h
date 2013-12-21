@@ -14,6 +14,8 @@
 #ifndef _STATISTICAL_FEATURES_H_
 #define _STATISTICAL_FEATURES_H_
 
+#include <boost/assign/list_of.hpp>
+
 #include "LA/matrix.h"
 #include "LA/linear_algebra.h"
 #include "PR/zoning.h"
@@ -316,8 +318,6 @@ float label(const T & r)
 template <class Image, class Feature>
 vector<Feature> covarience(const Image & img)
 {
-	vector<Feature> features(3);
-
 	// Create matrix of pixel coordinates 
 	Matrix<Feature> pixels;
 	for (unsigned r = 0; r < img.nrow(); ++r)
@@ -333,7 +333,7 @@ vector<Feature> covarience(const Image & img)
 	Matrix<Feature> c = cov(pixels);
 
 	// Put down to the feature vector (only 3 features since c is symmetric)
-	features[0] = c[0][0], features[1] = c[0][1], features[2] = c[1][1];
+	vector<Feature> features = boost::assign::list_of(c[0][0])(c[0][1])(c[1][1]);
 
 	return features;
 }

@@ -97,7 +97,7 @@ int read_mnist(const std::string & imagesFile, const std::string & labelsFile,
 			for (unsigned c = 0; c < numCol; ++c)
 			{
 				uint8_t val = read8(ifs);
-				img[r][c] = val;;
+				img[r][c] = val;
 			}
 		}
 
