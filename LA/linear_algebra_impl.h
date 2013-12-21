@@ -94,7 +94,7 @@ Matrix<T> cov(const Matrix<T> & m)
 template <class T>
 Matrix<T> inv(const Matrix<T> & m)
 {
-	if (!is_square(m) || det(m) == 0)
+	if (is_singular(m))
 		throw exception("cannot inverse singular matrix\n");
 
 	Matrix<T> matrix(m);

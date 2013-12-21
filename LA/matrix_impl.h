@@ -296,7 +296,7 @@ Matrix<T> operator ^ (const vector<T> & v1, const vector<T> & v2)
 	for (vector<T>::const_iterator itV1 = v1.begin(), itV2 = v2.begin(), 
 		itVEnd = v1.end(); itV1 != itVEnd; ++itV1, ++itV2)
 	{
-		res.add_row(boost::assign::list_of(*itV1)(*itV2));
+		res.add_row(boost::assign::list_of<T>(*itV1)(*itV2));
 	}
 
 	return res;
