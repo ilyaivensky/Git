@@ -14,7 +14,7 @@
 #define	_MATRIX_H_
 
 #include <vector>
-#include <limits>
+#include <initializer_list>
 
 using namespace std;
 
@@ -27,6 +27,9 @@ public:
 	typedef vector<Row> Super;
 
 	Matrix() {};
+
+	Matrix(const initializer_list<Row> & list) : 
+		Super(list) {};
 	
 	// Creates matrix row * col and initializes with val
 	Matrix(unsigned row, unsigned col, T val = T()) : 
@@ -60,7 +63,7 @@ public:
 	void resize(unsigned row, unsigned col)
 	{
 		vector<Row>::resize(row, Row(col));
-		for (vector<Row>::iterator it = begin(), itEnd = end(); it != itEnd; ++it)
+		for (auto it = begin(), itEnd = end(); it != itEnd; ++it)
 			it->resize(col);
 	}
 
@@ -72,7 +75,7 @@ public:
 		push_back(x);
 	}
 	
-	// The same as above, but we transpose other
+	// Returns (*this) * (other)^t
 	Matrix multiply_by_transposed(const Matrix & other) const;
 
 	// Creates transformed variant of self according to transform function
@@ -89,12 +92,12 @@ public:
 		Matrix<B> res(nrow(), ncol());
 			
 		const_iterator itRow = begin(), itRowEnd = end();
-		Matrix<B>::iterator resRowIt = res.begin();
+		auto resRowIt = res.begin();
 
 		for (; itRow != itRowEnd; ++itRow, ++resRowIt)
 		{
-			Row::const_iterator itCol = itRow->begin(), itColEnd = itRow->end();
-			Matrix<B>::Row::iterator resColIt = resRowIt->begin();
+			auto itCol = itRow->begin(), itColEnd = itRow->end();
+			auto resColIt = resRowIt->begin();
 
 			for (; itCol != itColEnd; ++itCol, ++resColIt)
 				*resColIt = label(*itCol);

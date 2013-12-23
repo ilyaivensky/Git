@@ -23,47 +23,51 @@ using boost::unit_test_framework::test_suite;
 
 void gramian_test()
 {
-	Matrix<int> m;
-	m.add_row(boost::assign::list_of( 24)(  0)( 30));
-	m.add_row(boost::assign::list_of( 24)( 30)(-30));
-	m.add_row(boost::assign::list_of( -6)(  0)(  0));
-	m.add_row(boost::assign::list_of( -6)(  0)( 30));
-	m.add_row(boost::assign::list_of(-36)(-30)(-30));
+	Matrix<int> m = { 
+		{  24,   0,  30 },
+		{  24,  30, -30 },
+		{  -6,   0,   0 },
+		{  -6,   0,  30 },
+		{ -36, -30, -30 }
+	};
 
-	Matrix<int> g;
-	g.add_row(boost::assign::list_of(2520)(1800)( 900));
-	g.add_row(boost::assign::list_of(1800)(1800)(   0));
-	g.add_row(boost::assign::list_of( 900)(   0)(3600));
-
+	Matrix<int> g = {
+		{ 2520, 1800,  900 },
+		{ 1800, 1800,    0 },
+		{  900,    0, 3600 }
+	};
+	
 	BOOST_REQUIRE(gram(m) == g); 
 }
 
 void covariance_test()
 {
-	Matrix<int> m(5, 3);
-	m[0][0] = 90, m[0][1] = 60, m[0][2] = 90;
-	m[1][0] = 90, m[1][1] = 90, m[1][2] = 30;
-	m[2][0] = 60, m[2][1] = 60, m[2][2] = 60;
-	m[3][0] = 60, m[3][1] = 60, m[3][2] = 90;
-	m[4][0] = 30, m[4][1] = 30, m[4][2] = 30;
+	Matrix<int> m = { 
+		{ 90, 60, 90 },
+		{ 90, 90, 30 },
+		{ 60, 60, 60 },
+		{ 60, 60, 90 },
+		{ 30, 30, 30 }
+	};
 
-	Matrix<int> c(3, 3);
-	c[0][0] = 504, c[0][1] = 360, c[0][2] = 180;
-	c[1][0] = 360, c[1][1] = 360, c[1][2] =   0;
-	c[2][0] = 180, c[2][1] =   0, c[2][2] = 720;
-
+	Matrix<int> c = { 
+		{ 504, 360, 180 },
+		{ 360, 360,   0 },
+		{ 180,   0, 720 }
+	};
+	
 	BOOST_REQUIRE(cov(m) == c); 
 }
 
 void inverse_test()
 {
-	Matrix<float> a(2, 2);
-	a[0][0] = 1, a[0][1] = 0;
-	a[1][0] = 2, a[1][1] = 2;
+	Matrix<float> a;
+	a.add_row({ 1, 0 });
+	a.add_row({ 2, 2 });
 
-	Matrix<float> a1(2, 2);
-	a1[0][0] =  1, a1[0][1] =   0;
-	a1[1][0] = -1, a1[1][1] = 0.5;
+	Matrix<float> a1;
+	a1.add_row(boost::assign::list_of<float>( 1)(  0));
+	a1.add_row(boost::assign::list_of<float>(-1)(0.5));
 
 	BOOST_REQUIRE(inv(a) == a1);
 }
@@ -81,58 +85,77 @@ void inverse_test2()
 
 void determinant3_test()
 {
-	Matrix<float> m;
-
-	m.add_row(boost::assign::list_of<float>(-2)( 2)(-3));
-	m.add_row(boost::assign::list_of<float>(-1)( 1)( 3));
-	m.add_row(boost::assign::list_of<float>( 2)( 0)(-1));
+	Matrix<float> m = {
+		{ -2,  2, -3 },
+		{ -1,  1,  3 },
+		{  2,  0, -1 }
+	};
 
 	BOOST_REQUIRE(det(m) == 18);
 }
 
 void determinant4_test()
 {
-	Matrix<int> m;
+	Matrix<int> m = {
+		{  1,  2,  3,  4 },
+		{  5,  6,  7,  8 },
+		{  9, 10, 11, 12 },
+		{ 13, 14, 15, 16 }
+	};
 
-	m.add_row(boost::assign::list_of( 1)( 2)( 3)( 4));
-	m.add_row(boost::assign::list_of( 5)( 6)( 7)( 8));
-	m.add_row(boost::assign::list_of( 9)(10)(11)(12));
-	m.add_row(boost::assign::list_of(13)(14)(15)(16));
-	
 	BOOST_REQUIRE(det(m) == 0);
 }
 
 void determinant5_test()
 {
-	Matrix<double> m;
-
-	m.add_row(boost::assign::list_of( 1)( 8)(-9)( 7)( 5));
-	m.add_row(boost::assign::list_of( 0)( 1)( 0)( 4)( 4));
-	m.add_row(boost::assign::list_of( 0)( 0)( 1)( 2)( 5));
-	m.add_row(boost::assign::list_of( 0)( 0)( 0)( 1)(-5));
-	m.add_row(boost::assign::list_of( 0)( 0)( 0)( 0)( 1));
+	Matrix<double> m(
+		{
+			{ 1,  8, -9,  7,  5 },
+			{ 0,  1,  0,  4,  4 },
+			{ 0,  0,  1,  2,  5 },
+			{ 0,  0,  0,  1, -5 },
+			{ 0,  0,  0,  0,  1 }
+		}
+	);
 
 	BOOST_REQUIRE(det(m) == 1);
 }
 
 void linear_solution_test()
 {
-	Matrix<float> a;
-	a.add_row(boost::assign::list_of<float>( 1)( 2)( 2));
-	a.add_row(boost::assign::list_of<float>( 2)( 2)( 2));
-	a.add_row(boost::assign::list_of<float>( 2)( 2)( 1));
-
-	Matrix<float> y(3, 1);
-	y[0][0] = 1;
-	y[1][0] = 2;
-	y[2][0] = 3;
-
-	Matrix<float> x(3, 1);
-	x[0][0] =  1;
-	x[1][0] =  1;
-	x[2][0] = -1;
+	Matrix<float> a = {
+		{ 1, 2, 2 },
+		{ 2, 2, 2 },
+		{ 2, 2, 1 }
+	};
+	
+	Matrix<float> y = {
+		{ 1 },
+		{ 2 },
+		{ 3 }
+	};
+	
+	Matrix<float> x = {
+		{  1 },
+		{  1 },
+		{ -1 }
+	};
 	
 	BOOST_REQUIRE(linear_solution(a, y) == x);
+}
+
+void square_dist_test()
+{
+	vector<int> v1 = { 1, 2, 3 };
+	vector<int> v2 = { 0, 4, 1 };
+
+	BOOST_REQUIRE(square_dist(v1, v2) == 9);
+}
+
+void norm_test()
+{
+	vector<double> v = { 3, 4 };
+	BOOST_REQUIRE(norm(v) == 5);
 }
 
 boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *argv[])
@@ -147,6 +170,8 @@ boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *ar
 	test->add(BOOST_TEST_CASE(&determinant4_test));
 	test->add(BOOST_TEST_CASE(&determinant5_test));
 	test->add(BOOST_TEST_CASE(&linear_solution_test));
+	test->add(BOOST_TEST_CASE(&square_dist_test));
+	test->add(BOOST_TEST_CASE(&norm_test));
 
     return test;
 }

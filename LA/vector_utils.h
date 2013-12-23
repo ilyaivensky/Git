@@ -35,9 +35,9 @@ T square_dist(const vector<T> & v1, const vector<T> & v2)
 		throw exception("dist: v1.size() != v2.size()");
 
 	T result = 0;
-	for (vector<T>::const_iterator it1 = v1.begin(), it1End = v1.end(), 
+	for (auto it1 = v1.begin(), it1End = v1.end(), 
 		it2 = v2.begin(); it1 != it1End; ++it1, ++it2)
-		result += pow(*it1 - *it2, 2);
+		result += static_cast<T>(pow(*it1 - *it2, 2));
 
 	return result;
 }
@@ -49,14 +49,14 @@ T euclidian_dist(const vector<T> & v1, const vector<T> & v2)
 }
 
 template <class T>
-T norm(const vector<T> & v, T p = 2.0)
+T norm(const vector<T> & v, T p = 2)
 {
-	if (p < 1.0)
+	if (p < 1)
 		throw exception("norm of vector is not defined for p < 1");
 
-	T sum = 0.0;
-	for (vector<T>::const_iterator it = v.begin(), itEnd = v.end(); it != itEnd; ++it)
-		sum += pow(*it, p);
+	T sum = 0;
+	for (auto val : v) 
+		sum += pow(val, p);
 
 	return pow(sum, 1/p);
 }
@@ -65,7 +65,7 @@ template <class T>
 void make_vector_set(vector<T> & v)
 {
 	sort(v.begin(), v.end());
-	vector<T>::iterator itEnd = unique(v.begin(), v.end());
+	auto itEnd = unique(v.begin(), v.end());
 	v.erase(itEnd, v.end());
 }
 

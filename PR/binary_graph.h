@@ -86,9 +86,12 @@ struct Edges : public std::vector<Edge>
 
 	template <class T>
 	Edges(const Matrix<T> & img);
+
+	unsigned getNodeDegree(const Node & node) const;
+	unsigned getNodeConnectivity(const Node & node) const;
 	
 	Edges getClosedCircleEdges(const Node & node) const;
-
+	Edges get8CircleEdges(const Node & node) const;
 	Edges get16CircleEdges(const Node & node) const;
 	Edges get20CircleEdges(const Node & node) const;
 

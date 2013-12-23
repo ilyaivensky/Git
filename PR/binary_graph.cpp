@@ -142,6 +142,62 @@ bool Nodes::isRemoved(const Node & n)
 	return find(begin(), end(), n) == end();
 }
 
+unsigned Edges::getNodeDegree(const Node & node) const
+{
+	unsigned degree = 0;
+	vector<Node> n = node.getNeighbours();
+
+	Edge lowerBoundEdge(Node(node.i() - 1, node.j() - 1), Node(node.i() - 1, node.j()));
+	Edge upperBoundEdge(Node(node.i() + 1, node.j() + 1), Node());
+
+	const_iterator itLower = std::lower_bound(begin(), end(), lowerBoundEdge);
+	const_iterator itUpper = std::upper_bound(begin(), end(), upperBoundEdge);
+
+	for (const_iterator it = itLower; it != itUpper; ++it)
+	{
+		const Edge & e = *it;
+			
+		// Add all edges originating at (i,j)
+		if (e.src() == node || e.dest() == node)
+			++degree;
+	}
+
+	return degree;
+}
+
+unsigned  Edges::getNodeConnectivity(const Node & node) const
+{
+	Edges circleClosure = getClosedCircleEdges(node);
+
+	unsigned k = 0;
+	for (; k < circleClosure.size(); ++k)
+		if (!circleClosure[k].exist())
+			break;
+	if (k == circleClosure.size())
+		return 0;
+
+	unsigned conn = 0;
+	for (unsigned k = 0; k < 8; ++k)
+		if (circleClosure[k].exist())
+			++conn;
+	for (unsigned k = 0; k < 8; ++k)
+		if (circleClosure[k].exist() && 
+			circleClosure[k + 1].exist())
+			--conn;
+	for (unsigned k = 0; k < 4; ++k)
+		if (circleClosure[2 * k].exist() && 
+			circleClosure[2 * k + 1].exist() &&
+			circleClosure[2 * k + 2].exist())
+			++conn;
+	for (unsigned k = 0; k < 4; ++k)
+		if (circleClosure[2 * k].exist() && 
+			circleClosure[2 * k + 2].exist() &&
+			circleClosure[k + 9].exist())
+			--conn;
+
+	return conn;
+}
+
 Edges Edges::getClosedCircleEdges(const Node & node) const
 {
 	Edges result(13);
@@ -197,6 +253,33 @@ Edges Edges::getClosedCircleEdges(const Node & node) const
 			else if (e.src() == n[4])
 				result[10] = e;
 		}
+	}
+
+	return result;
+}
+
+Edges Edges::get8CircleEdges(const Node & node) const
+{
+	Edges result(8);
+
+	Nodes adjacent(8);
+	for (unsigned i = 0; i < 8; ++i)
+		adjacent[i] = node.adjacent(i);
+
+	Edge lowerBoundEdge(Node(node.i() - 1, node.j() - 1), Node(node.i() - 1, node.j()));
+	Edge upperBoundEdge(Node(node.i() + 1, node.j() + 1), Node());
+
+	const_iterator itLower = std::lower_bound(begin(), end(), lowerBoundEdge);
+	const_iterator itUpper = std::upper_bound(begin(), end(), upperBoundEdge);
+
+	for (const_iterator it = itLower; it != itUpper; ++it)
+	{
+		const Edge & e = *it;
+
+		if (e.src() == node)
+			result[node.getAdjacentCode(e.dest())] = e;
+		else if (e.dest() == node)
+			result[node.getAdjacentCode(e.src())] = e;
 	}
 
 	return result;

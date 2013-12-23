@@ -7,6 +7,8 @@
  *   
  */
 
+#include <limits>
+
 template <class T>
 T tr(const Matrix<T> & m)
 {
