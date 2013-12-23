@@ -31,16 +31,85 @@ void delete_diag_at_concaves(const Nodes & nodes, Edges & edges)
 	}
 }
 
+vector<Node> get_border_nodes(const Nodes & nodes, const Edges & edges)
+{
+	vector<Node> border_nodes;
+
+	for (Nodes::const_iterator it = nodes.begin(), itEnd = nodes.end(); it != nodes.end(); ++it)
+	{
+		const Node & curr = *it;
+		if (edges.getNodeConnectivity(curr) == 1)
+			border_nodes.push_back(curr);
+	}
+
+	return border_nodes;
+}
+
+void peel_border(Nodes & nodes, Edges & edges, vector<Node> & border, unsigned code)
+{
+	vector<Node> nodes_to_remove;
+	for (vector<Node>::const_iterator it = border.begin(), itEnd = border.end(); it != itEnd; ++it)
+	{
+		const Node & node = *it;
+		Edges adjacent = edges.get8CircleEdges(node);
+		if (adjacent[code].exist())
+			continue;
+
+		unsigned degree = 0;
+		for (Edges::const_iterator itA = adjacent.begin(), itAEnd = adjacent.end(); itA != itAEnd; ++itA)
+			if (itA->exist())
+				++degree;
+
+		if (degree == 1)
+			continue;
+
+		if (edges.getNodeConnectivity(node) == 1)
+		{
+			std::sort(adjacent.begin(), adjacent.end());
+			edges.remove(adjacent);
+			nodes_to_remove.push_back(node);
+			
+		}
+	}
+		
+	vector<Node> diff(border.size() - nodes_to_remove.size());
+	vector<Node>::iterator itBEnd = set_difference(border.begin(), border.end(), 
+		nodes_to_remove.begin(), nodes_to_remove.end(), diff.begin());
+	border.swap(diff);
+	nodes.remove(nodes_to_remove);
+}
+
 void delete_border_nodes(Nodes & nodes, Edges & edges)
 {
+	
 	Nodes::iterator itEnd = nodes.end();
 	for (Nodes::iterator it = nodes.begin(); it != nodes.end(); )
 	{
 		const Node & curr = *it;
-		unsigned connectivity = 0;
+		
 		Edges circleClosure = edges.getClosedCircleEdges(curr);
 
-		for (unsigned k = 0; k < circleClosure.size(); ++k)
+		unsigned degree = 0;
+		for (unsigned k = 0; k < 8; ++k)
+			if (circleClosure[k].exist())
+				++degree;
+		
+		if (degree == 1)
+		{
+			// This is the endpoint - do not delete to preserve topology
+			++it;
+			continue;
+		}
+
+		if (circleClosure[6].exist() || circleClosure[0].exist() || 
+			circleClosure[2].exist() || circleClosure[4].exist())
+		{
+			++it;
+			continue;
+		}
+		
+		unsigned connectivity = degree;
+		for (unsigned k = 8; k < circleClosure.size(); ++k)
 			if (circleClosure[k].exist())
 				++connectivity;
 
@@ -90,32 +159,32 @@ void delete_extra_diag_edges(const Nodes & nodes, Edges & edges)
 {
 	vector<Edge> to_remove;
 
-	// Delete extra diagonal edges (i.e. edges 1, 3, 5, 7)
+	// Delete extra diagonal edges (i.e. edges 16, 17, 18, 19)
 	for (Nodes::const_iterator it = nodes.begin(), itEnd = nodes.end(); it != itEnd; ++it)
 	{
 		const Node & curr = *it;
-		Nodes n = nodes.getNeighbours(curr);
-		Edges e = edges.get16CircleEdges(curr);
+		//Nodes n = nodes.getNeighbours(curr);
+		Edges e = edges.get20CircleEdges(curr);
 				
-		if (n[1].exist() && n[2].exist())
-			if (e[2].exist() && e[9].exist())
-				if (!e[0].exist() || !e[8].exist())
-					to_remove.push_back(e[1]);
+		//if (n[1].exist() && n[2].exist())
+			if (e[8].exist() && e[9].exist() && e[16].exist())
+				if (!e[0].exist() || !e[2].exist())
+					to_remove.push_back(e[16]);
 
-		if (n[3].exist() && n[4].exist())
-			if (e[4].exist() && e[11].exist())
-				if (!e[2].exist() || !e[10].exist())
-					to_remove.push_back(e[3]);
+		//if (n[3].exist() && n[4].exist())
+			if (e[10].exist() && e[11].exist() && e[17].exist())
+				if (!e[2].exist() || !e[4].exist())
+					to_remove.push_back(e[17]);
 
-		if (n[5].exist() && n[6].exist())
-			if (e[6].exist() && e[13].exist())
-				if (!e[4].exist() || !e[12].exist())
-					to_remove.push_back(e[5]);
+		//if (n[5].exist() && n[6].exist())
+			if (e[12].exist() && e[13].exist() && e[18].exist())
+				if (!e[4].exist() || !e[6].exist())
+					to_remove.push_back(e[18]);
 
-		if (n[7].exist() && n[0].exist())
-			if (e[0].exist() && e[15].exist())
-				if (!e[6].exist() || !e[14].exist())
-					to_remove.push_back(e[7]);
+		//if (n[7].exist() && n[0].exist())
+			if (e[14].exist() && e[15].exist() && e[19].exist())
+				if (!e[6].exist() || !e[0].exist())
+					to_remove.push_back(e[19]);
 	}
 
 	if (to_remove.size() > 0)
@@ -133,35 +202,35 @@ void delete_extra_vert_and_hor_edges(const Nodes & nodes, Edges & edges)
 	for (Nodes::const_iterator it = nodes.begin(), itEnd = nodes.end(); it != itEnd; ++it)
 	{
 		const Node & curr = *it;
-		Nodes n = nodes.getNeighbours(curr);
+		//Nodes n = nodes.getNeighbours(curr);
 		Edges e = edges.get20CircleEdges(curr);
 				
-		if (n[2].exist() && n[3].exist() && n[4].exist())
+		//if (n[2].exist() && n[3].exist() && n[4].exist())
 			if (e[4].exist() && e[17].exist() && e[3].exist())
 				if ((!e[5].exist() && !e[18].exist()) ||
 					(!e[5].exist() && !e[6].exist()) ||
 					(!e[12].exist() && !e[18].exist()))
 					to_remove.push_back(e[4]);
 
-		if (n[4].exist() && n[5].exist() && n[6].exist())
+		//if (n[4].exist() && n[5].exist() && n[6].exist())
 			if (e[6].exist() && e[18].exist() && e[5].exist())
 				if ((!e[7].exist() && !e[19].exist()) ||
 					(!e[7].exist() && !e[8].exist()) ||
 					(!e[14].exist() && !e[19].exist()))
 					to_remove.push_back(e[6]);
 
-		if (n[6].exist() && n[7].exist() && n[0].exist())
+	//	if (n[6].exist() && n[7].exist() && n[0].exist())
 			if (e[0].exist() && e[19].exist() && e[7].exist())
 				if ((!e[9].exist() && !e[16].exist()) ||
 					(!e[9].exist() && !e[10].exist()) ||
-					(!e[14].exist() && !e[16].exist()))
+					(!e[8].exist() && !e[16].exist()))
 					to_remove.push_back(e[0]);
 
-		if (n[0].exist() && n[1].exist() && n[2].exist())
+		//if (n[0].exist() && n[1].exist() && n[2].exist())
 			if (e[2].exist() && e[16].exist() && e[1].exist())
 				if ((!e[11].exist() && !e[17].exist()) ||
 					(!e[11].exist() && !e[12].exist()) ||
-					(!e[14].exist() && !e[17].exist()))
+					(!e[10].exist() && !e[17].exist()))
 					to_remove.push_back(e[2]);
 	}
 

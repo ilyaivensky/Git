@@ -75,21 +75,21 @@ void Matrix<T>::scale(T lb, T ub)
 	if (ub <= lb)
 		throw exception("upper bound is not greater than lower bound");
 
-	vector<T> feature_max(col_, numeric_limits<T>::min());
-	vector<T> feature_min(col_, numeric_limits<T>::max());
+	vector<T> feature_max(ncol(), numeric_limits<T>::min());
+	vector<T> feature_min(ncol(), numeric_limits<T>::max());
 
-	for (unsigned r = 0; r < row; ++r)
-		for (unsigned c = 0; c < col; ++c)
+	for (unsigned r = 0; r < nrow(); ++r)
+		for (unsigned c = 0; c < ncol(); ++c)
 		{
 			const Row & row = (*this)[r];
 			feature_max[c] = std::max(row[c], feature_max[c]);
 			feature_min[c] = std::min(row[c], feature_min[c]);
 		}
 
-	for (unsigned r = 0; r < row; ++r)
+	for (unsigned r = 0; r < nrow(); ++r)
 	{
 		const Row & row = (*this)[r];
-		for (unsigned c = 0; c < col; ++c)
+		for (unsigned c = 0; c < ncol(); ++c)
 		{
 			if (feature_max[c] == feature_min[c])
 				continue;
@@ -158,10 +158,6 @@ Matrix<T> Matrix<T>::multiply_by_transposed(const Matrix<T> & other) const
 			res[m][n] = elem;
 		}
 	}
-
-#if 0
-	cerr << "multiply_by_transposed is:" << endl << res << endl;
-#endif
 
 	return res;
 }

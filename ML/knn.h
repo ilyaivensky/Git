@@ -46,17 +46,17 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data,
 								  const Matrix<unsigned> & refLabels) const
 {
 	// Column vector of predictions
-	Matrix<unsigned> predictedLabels(data.row, 1);
+	Matrix<unsigned> predictedLabels(data.nrow(), 1);
 
 	// For each example ...
-	for (unsigned m = 0; m < data.row; ++m)
+	for (unsigned m = 0; m < data.nrow(); ++m)
 	{
 		// Step 1: find nearest members and their labels
 
 		vector<T> min_dist(numNN, std::numeric_limits<T>::max());
 		vector<unsigned> nn(numNN);
 
-		for (unsigned tr = 0; tr < trainedData_.row; ++tr)
+		for (unsigned tr = 0; tr < trainedData_.nrow(); ++tr)
 		{
 			// Actually, we have to calculate Euclidian distance
 			// Instead, for efficiency reason, we calculate only a sum of quadrats and skip a sqrt

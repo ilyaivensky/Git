@@ -7,10 +7,12 @@
  *   
  */
 
+#include <limits>
+
 template <class T>
 T tr(const Matrix<T> & m)
 {
-	if (!m.is_square())
+	if (!is_square(m))
 		throw exception("trace is not defined for non-square matrix");
 
 	T tr = 0;
@@ -57,8 +59,8 @@ Matrix<T> gram(const Matrix<T> & m)
 		for (unsigned j = i; j < DIM; ++j)
 		{
 			T & rij = ri[j]; 
-			for (Matrix<T>::const_iterator it = m.begin(), itEnd = m.end(); it != itEnd; ++it)
-				rij += (*it)[i] * (*it)[j];
+			for (auto row : m)
+				rij += row[i] * row[j];
 
 			res[j][i] = rij;
 		}
