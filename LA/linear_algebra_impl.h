@@ -59,6 +59,7 @@ Matrix<T> gram(const Matrix<T> & m)
 		for (unsigned j = i; j < DIM; ++j)
 		{
 			T & rij = ri[j]; 
+
 			for (auto row : m)
 				rij += row[i] * row[j];
 
