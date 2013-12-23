@@ -93,6 +93,7 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data,
 		// Find the most popular prediction
 		unsigned maxPredictions = 0;
 		unsigned label = nn[0]; // initialize by the nearest neighbour
+
 		for (const auto & p : predicted)
 		{
 			if (p.second > maxPredictions)
