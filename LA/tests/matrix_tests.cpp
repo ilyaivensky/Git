@@ -55,7 +55,7 @@ void covariance_test()
 		{ 360, 360,   0 },
 		{ 180,   0, 720 }
 	};
-	
+
 	BOOST_REQUIRE(cov(m) == c); 
 }
 

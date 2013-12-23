@@ -60,7 +60,7 @@ Matrix<T> gram(const Matrix<T> & m)
 		{
 			T & rij = ri[j]; 
 
-			for (auto row : m)
+			for (const auto & row : m)
 				rij += row[i] * row[j];
 
 			res[j][i] = rij;
@@ -71,7 +71,7 @@ Matrix<T> gram(const Matrix<T> & m)
 }
 
 template <class T>
-vector<T> medc(const Matrix<T> & m)
+vector<T> mean_col(const Matrix<T> & m)
 {
 	Matrix<T> k(1, m.nrow(), 1);
 	Matrix<T> res(k * m);
@@ -82,7 +82,7 @@ vector<T> medc(const Matrix<T> & m)
 template <class T>
 Matrix<T> dev(const Matrix<T> & m)
 {
-	return m - Matrix<T>(medc(m), m.nrow());
+	return m - Matrix<T>(mean_col(m), m.nrow());
 }
 
 template <class T>

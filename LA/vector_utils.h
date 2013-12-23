@@ -55,7 +55,7 @@ T norm(const vector<T> & v, T p = 2)
 		throw exception("norm of vector is not defined for p < 1");
 
 	T sum = 0;
-	for (auto val : v) 
+	for (const auto & val : v) 
 		sum += pow(val, p);
 
 	return pow(sum, 1/p);

@@ -27,9 +27,9 @@ vector<Feature> feature_points(const Image & img, const Matrix<Zone> & zones)
 	unsigned zone_offset = 0;
 
 	// Calculate features separately for each zone
-	for (Matrix<Zone>::const_iterator itRow = zones.begin(), itRowEnd = zones.end(); itRow != itRowEnd; ++itRow)
+	for (const auto & zones_row : zones)
 	{
-		for (vector<Zone>::const_iterator itCol = itRow->begin(), itColEnd = itRow->end(); itCol != itColEnd; ++itCol, zone_offset += 3)
+		for (auto itCol = zones_row.begin(), itColEnd = zones_row.end(); itCol != itColEnd; ++itCol, zone_offset += 3)
 		{
 			const Zone & z  = *itCol;
 

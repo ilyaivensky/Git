@@ -13,9 +13,6 @@
 
 #ifndef _STATISTICAL_FEATURES_H_
 #define _STATISTICAL_FEATURES_H_
-
-#include <boost/assign/list_of.hpp>
-
 #include "LA/matrix.h"
 #include "LA/linear_algebra.h"
 #include "PR/zoning.h"
@@ -26,8 +23,8 @@ vector<Feature> raw_binary_pixels(const Image & image)
 {
 	vector<Feature> features;
 
-	for (Image::const_iterator itR = image.begin(), itREnd = image.end(); itR != itREnd; ++itR)
-		features.insert(features.end(), itR->begin(), itR->end());
+	for (const auto & row : image)
+		features.insert(features.end(), row.begin(), row.end());
 
 	return features;
 }
@@ -38,17 +35,14 @@ vector<Feature> histograms(const Image & image, const Matrix<Zone> & zones)
 	vector<Feature> features;
 
 	// Calculate features separately for each zone
-	for (Matrix<Zone>::const_iterator itRow = zones.begin(), itRowEnd = zones.end(); itRow != itRowEnd; ++itRow)
-	{
-		for (vector<Zone>::const_iterator itCol = itRow->begin(), itColEnd = itRow->end(); itCol != itColEnd; ++itCol)
+	for (const auto & zones_row : zones)
+		for (const auto & z : zones_row)
 		{
-			const Zone & z  = *itCol;
-
 			unsigned rows = z.rowsEnd() - z.rowsBegin();
 			unsigned cols = z.colsEnd() - z.colsBegin();
 
 			// Extracts vertical and horizontal histograms
-			vector<unsigned> vp(cols), hp(rows);
+			vector<Feature> vp(cols), hp(rows);
 
 			for (unsigned r = z.rowsBegin(), r_loc = 0; r < z.rowsEnd(); ++r, ++r_loc)
 				for (unsigned c = z.colsBegin(), c_loc = 0; c < z.colsEnd(); ++c, ++c_loc)
@@ -59,7 +53,7 @@ vector<Feature> histograms(const Image & image, const Matrix<Zone> & zones)
 			features.insert(features.end(), vp.begin(), vp.end());
 #if 1
 			// Extracts left-right diagonal histograms
-			vector<unsigned> lrd(rows + cols - 1);
+			vector<Feature> lrd(rows + cols - 1);
 			for (unsigned k = 0; k < lrd.size(); ++k)
 			{
 				// Set the break point in intioalization of row idx and col idx
@@ -80,7 +74,7 @@ vector<Feature> histograms(const Image & image, const Matrix<Zone> & zones)
 			features.insert(features.end(), lrd.begin(), lrd.end());
 
 			// Extracts right-left diagonal histograms
-			vector<unsigned> rld(rows + cols - 1);
+			vector<Feature> rld(rows + cols - 1);
 			for (unsigned k = 0; k < rld.size(); ++k)
 			{
 				// Set the break point in intioalization of row idx and col idx
@@ -102,7 +96,6 @@ vector<Feature> histograms(const Image & image, const Matrix<Zone> & zones)
 			features.insert(features.end(), rld.begin(), rld.end());
 #endif
 		}
-	}
 	
 	return features;
 }
@@ -333,7 +326,7 @@ vector<Feature> covarience(const Image & img)
 	Matrix<Feature> c = cov(pixels);
 
 	// Put down to the feature vector (only 3 features since c is symmetric)
-	vector<Feature> features = boost::assign::list_of(c[0][0])(c[0][1])(c[1][1]);
+	vector<Feature> features = { c[0][0], c[0][1], c[1][1] };
 
 	return features;
 }

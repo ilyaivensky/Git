@@ -29,9 +29,9 @@ Matrix<T> inv(const Matrix<T> & m);
 template <class T>
 Matrix<T> gram(const Matrix<T> & x);
 
-// Returns vector of column medians
+// Returns vector of column means
 template <class T>
-vector<T> medc(const Matrix<T> & m);
+vector<T> mean_col(const Matrix<T> & m);
 
 // Returns deviation scores matrix, where each element of
 // column vector is deviation score of corresponding 

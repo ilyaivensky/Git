@@ -93,11 +93,10 @@ Matrix<unsigned> KNN<T>::classify(const Matrix<T> & data,
 		// Find the most popular prediction
 		unsigned maxPredictions = 0;
 		unsigned label = nn[0]; // initialize by the nearest neighbour
-		for (map<unsigned, unsigned>::const_iterator it = predicted.begin(), 
-			itEnd = predicted.end(); it != itEnd; ++it)
+		for (const auto & p : predicted)
 		{
-			if (it->second > maxPredictions)
-				maxPredictions = it->second; label = it->first;
+			if (p.second > maxPredictions)
+				maxPredictions = p.second; label = p.first;
 		}
 
 		predictedLabels[m][0] = label;

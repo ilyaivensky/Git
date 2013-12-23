@@ -42,7 +42,7 @@ Image scan_contours(const Image & m)
 			if (bool(m[i][j]) != state)
 			{
 				// Record new state
-				state = bool(m[i][j]);
+				state = static_cast<bool>(m[i][j]);
 				if (m[i][j])
 				{
 					// Add contour for the current field

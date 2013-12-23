@@ -18,6 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -88,8 +89,8 @@ int read_mnist(const std::string & imagesFile, const std::string & labelsFile,
 	labels.resize(std::min(numImgs, maxImgs), -1);
 
 	unsigned i = 1;
-	vector<int>::iterator itLbls = labels.begin();
-	for (vector<Image>::iterator itImgs = images.begin(), itEnd = images.end(); itImgs != itEnd; ++itImgs, ++itLbls, ++i)
+	auto itLbls = labels.begin();
+	for (auto itImgs = images.begin(), itEnd = images.end(); itImgs != itEnd; ++itImgs, ++itLbls, ++i)
 	{
 		Image & img = *itImgs;
 		for (unsigned r = 0; r < numRow; ++r)

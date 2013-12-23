@@ -29,13 +29,13 @@ void write_SVM_data_file(const std::string & fileName, Matrix<D> & features, vec
 	of.open(str.str(), 'w');
 	
 	unsigned i = 0;
-	vector<L>::const_iterator itL = labels.begin();
-	for (Matrix<D>::const_iterator itD = features.begin(), itDEnd = features.end(); 
+	auto itL = labels.begin();
+	for (auto itD = features.begin(), itDEnd = features.end(); 
 		itD != itDEnd; ++itD, ++itL, ++i)
 	{
 		of << *itL << " ";
 		unsigned id = 1;
-		for (vector<D>::const_iterator itF = itD->begin(), itFEnd = itD->end(); itF != itFEnd; ++itF, ++id)
+		for (auto itF = itD->begin(), itFEnd = itD->end(); itF != itFEnd; ++itF, ++id)
 				of << id << ":" << *itF << " ";
 		of << "\n";
 		if (i % 1000 == 0)
