@@ -21,8 +21,8 @@ double moment(const Matrix<T> & m, unsigned p, unsigned q)
 {
 	double result = 0.0;
 
-	for (unsigned y = 0;  y < m.row; ++y)
-		for (unsigned x = 0; x < m.col; ++x)
+	for (unsigned y = 0;  y < m.nrow(); ++y)
+		for (unsigned x = 0; x < m.ncol(); ++x)
 			if (m[y][x] != 0)
 				result += pow(x, p) * pow(y, q);
 			
@@ -34,8 +34,8 @@ double central_moment(const Matrix<T> & m, unsigned xc, unsigned yc, unsigned p,
 {
 	double result = 0.0;
 
-	for (unsigned y = 0;  y < m.row; ++y)
-		for (unsigned x = 0; x < m.col; ++x)
+	for (unsigned y = 0;  y < m.nrow(); ++y)
+		for (unsigned x = 0; x < m.ncol(); ++x)
 			if (m[y][x] != 0)
 				result += pow(x - xc, p) * pow(y - yc, q);
 			
@@ -64,17 +64,17 @@ Matrix<T> moment_based_normalization(const Matrix<T> & m)
 	
 	double tan = -(mu11 / mu02); 
 	
-	Matrix<T> result(m.row, m.col);
+	Matrix<T> result(m.nrow(), m.ncol());
 		
-	for (unsigned y = 0; y < m.row; ++y)
+	for (unsigned y = 0; y < m.nrow(); ++y)
 	{
-		for (unsigned x = 0; x < m.col; ++x)
+		for (unsigned x = 0; x < m.ncol(); ++x)
 		{
 			signed y_tmp = y - yc;
 			signed x1 = x - static_cast<signed>(y_tmp * tan + 0.5);
 
 			// If are we out of the range due to rotation?
-			if (x1 < 0 || x1 >= static_cast<signed>(result.col))
+			if (x1 < 0 || x1 >= static_cast<signed>(result.ncol()))
 				continue;
 			
 			result[y][x1] = m[y][x];

@@ -132,13 +132,13 @@ Image zhang_suen_thinning (const Image & img)
 	// There is no frame - we will create one temporarily 
 	
 	Image framed = make_frame(img);
-	Image framed_sceleton = _zhang_suen_thinning(framed);
-	Image sceleton(img.nrow(), img.ncol());
-	for (unsigned r = 1; r < framed_sceleton.nrow() - 1; ++r)
-		for (unsigned c = 1; c < framed_sceleton.ncol() - 1; ++c)
-			sceleton[r - 1][c - 1] = framed_sceleton[r][c];
+	Image framed_skeleton = _zhang_suen_thinning(framed);
+	Image skeleton(img.nrow(), img.ncol());
+	for (unsigned r = 1; r < framed_skeleton.nrow() - 1; ++r)
+		for (unsigned c = 1; c < framed_skeleton.ncol() - 1; ++c)
+			skeleton[r - 1][c - 1] = framed_skeleton[r][c];
 
-	return sceleton;
+	return skeleton;
 }
 
 #endif
