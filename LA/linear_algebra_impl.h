@@ -187,6 +187,7 @@ vector<T> eigenvalues_2x2(const Matrix<T> & m)
 		throw exception("eigen_values_2x2(): matrices of this size are not supported");
 
 	auto cp = characteristic_polynomial(m);
+
 	return solve_quadratic(cp);
 }
 
