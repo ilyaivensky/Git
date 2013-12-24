@@ -60,21 +60,10 @@ public:
 
 	void interactive_init();
 
-	void resize(unsigned row, unsigned col)
-	{
-		vector<Row>::resize(row, Row(col));
-		for (auto it = begin(), itEnd = end(); it != itEnd; ++it)
-			it->resize(col);
-	}
-
-	void add_row(const Row & x)
-	{
-		if (!empty() && front().size() != x.size())
-			throw exception("Matrix: inconsistent num of columns");
-
-		push_back(x);
-	}
+	void resize(unsigned row, unsigned col);
 	
+	void add_row(const Row & x);
+		
 	// Returns (*this) * (other)^t
 	Matrix multiply_by_transposed(const Matrix & other) const;
 
@@ -91,7 +80,7 @@ public:
 	{
 		Matrix<B> res(nrow(), ncol());
 			
-		const_iterator itRow = begin(), itRowEnd = end();
+		auto itRow = begin(), itRowEnd = end();
 		auto resRowIt = res.begin();
 
 		for (; itRow != itRowEnd; ++itRow, ++resRowIt)
@@ -108,7 +97,7 @@ public:
 
 	// Scales the content of matrix 
 	// into range [lower_bound, upper_bound]
-	void scale(T lower_bound, T upper_bound);
+	void scale(const T & lower_bound, const T & upper_bound);
 
 	// Creates diagonal matrix 
 	static Matrix diag(unsigned size, const T & value); 

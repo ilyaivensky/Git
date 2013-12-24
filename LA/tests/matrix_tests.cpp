@@ -128,20 +128,71 @@ void linear_solution_test()
 		{ 2, 2, 2 },
 		{ 2, 2, 1 }
 	};
-	
+
 	Matrix<float> y = {
 		{ 1 },
 		{ 2 },
 		{ 3 }
 	};
-	
+
 	Matrix<float> x = {
-		{  1 },
-		{  1 },
+		{ 1 },
+		{ 1 },
 		{ -1 }
 	};
-	
+
 	BOOST_REQUIRE(linear_solution(a, y) == x);
+}
+
+template <class T>
+void eigenvalue_2x2_test(const Matrix<T> & m)
+{
+	vector<float> eigenvalues = eigenvalues_2x2(m);
+
+	Matrix<float> l0 = {
+		{ eigenvalues[0], 0 },
+		{ 0, eigenvalues[0] }
+	};
+
+	Matrix<float> l1 = {
+		{ eigenvalues[1], 0 },
+		{ 0, eigenvalues[1] }
+	};
+
+	BOOST_REQUIRE(det(l0 - m) == 0);
+	BOOST_REQUIRE(det(l1 - m) == 0);
+}
+
+void eigenvalue_2x2_test1()
+{
+	Matrix<float> m = { 
+		{ 1, 2 },
+		{ 4, 3 }
+	};
+
+	eigenvalue_2x2_test(m);
+}
+
+void eigenvalue_2x2_test2()
+{
+	Matrix<float> m = {
+		{ 1, -4 },
+		{ 4, -7 }
+	};
+
+	eigenvalue_2x2_test(m);
+}
+
+void characteristic_polynomial_3x3_test()
+{
+	Matrix<double> m = {
+		{ 3, 2, 4 },
+		{ 2, 0, 2 },
+		{ 4, 2, 3 }
+	};
+
+	vector<double> cp = { -1, 6, 15, 8 };
+	BOOST_REQUIRE(characteristic_polynomial(m) == cp);
 }
 
 void square_dist_test()
@@ -172,6 +223,9 @@ boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *ar
 	test->add(BOOST_TEST_CASE(&linear_solution_test));
 	test->add(BOOST_TEST_CASE(&square_dist_test));
 	test->add(BOOST_TEST_CASE(&norm_test));
+	test->add(BOOST_TEST_CASE(&eigenvalue_2x2_test1));
+	test->add(BOOST_TEST_CASE(&eigenvalue_2x2_test2));
+	test->add(BOOST_TEST_CASE(&characteristic_polynomial_3x3_test));
 
     return test;
 }
@@ -181,4 +235,3 @@ int run_test(int argc, char* argv[])
   boost::unit_test::init_unit_test_func init_func = &init_unit_test_suite;
   return ::boost::unit_test::unit_test_main(init_func, argc, argv );
 }
-

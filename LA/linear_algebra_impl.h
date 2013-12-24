@@ -1,4 +1,4 @@
-/*                                                                 -*- C++ -*-
+﻿/*                                                                 -*- C++ -*-
  * File: linear_algebra_impl.h
  * 
  * Author: Ilya Ivensky
@@ -141,7 +141,54 @@ Matrix<T> inv(const Matrix<T> & m)
 	return inverse;
 }
 
+template <class T>
+vector<T> characteristic_polynomial(const Matrix<T> & m)
+{
+	if (!is_square(m))
+		throw exception("characteristic_polynomial(): Matrix is not square");
 
+	switch (m.size())
+	{
+	case 2:
+		return vector<T>({ 1, (-1) * tr(m), det(m) });
+	case 3:
+	{
+		T c = (pow(tr(m), 2) - tr(m * m)) / (-2);
+		return vector<T>({ (-1), tr(m), c, det(m) });
+	}
+	default:
+		break;
+	}
+
+	throw exception("characteristic_polynomial(): matrices of this size are not supported");
+	return vector<T>();
+}
+
+template <class T>
+vector<T> solve_quadratic(const vector<T> & p)
+{
+	if (p.size() != 3)
+		throw exception("solve_quadratic(): polynom length is not 3");
+
+	T d = sqrt(pow(p[1], 2) - (4 * p[0] * p[2]));
+	T a2 = 2 * p[0];
+	T b = (-1) * p[1];
+
+	T root1 = (b - d) / a2;
+	T root2 = (b + d) / a2;
+
+	return vector<T>( { root1, root2 } );
+}
+
+template <class T>
+vector<T> eigenvalues_2x2(const Matrix<T> & m)
+{
+	if (m.nrow() != 2 || m.ncol() != 2)
+		throw exception("eigen_values_2x2(): matrices of this size are not supported");
+
+	vector<float> cp = characteristic_polynomial(m);
+	return solve_quadratic(cp);
+}
 
 
 
