@@ -59,6 +59,23 @@ Matrix<T>::Matrix(unsigned ncol, const vector<T> & col)
 }
 
 template <class T>
+void Matrix<T>::resize(unsigned row, unsigned col)
+{
+	vector<Row>::resize(row, Row(col));
+	for (auto & row : *this)
+		row.resize(col);
+}
+
+template <class T>
+void Matrix<T>::add_row(const Row & x)
+{
+	if (!empty() && front().size() != x.size())
+		throw exception("Matrix: inconsistent num of columns");
+
+	push_back(x);
+}
+
+template <class T>
 Matrix<T> Matrix<T>::diag(unsigned n, const T & val)
 {
 	Matrix<T> r(n);
@@ -69,7 +86,7 @@ Matrix<T> Matrix<T>::diag(unsigned n, const T & val)
 }
 
 template <class T>
-void Matrix<T>::scale(T lb, T ub)
+void Matrix<T>::scale(const T & lb, const T & ub)
 {
 	if (ub <= lb)
 		throw exception("upper bound is not greater than lower bound");
