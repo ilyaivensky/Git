@@ -51,6 +51,9 @@ bool is_square(const Matrix<T> & m) { return m.nrow() == m.ncol(); }
 template <class T>
 bool is_singular(const Matrix<T> & m) { return !is_square(m) || det(m) == 0; }
 
+template <class T>
+Matrix<T> echelon(const Matrix<T> & m);
+
 template <class T> 
 Matrix<T> linear_solution(const Matrix<T> & a, const Matrix<T> & y) { return inv(a) * y; } 
 
@@ -74,6 +77,12 @@ vector<T> characteristic_polynomial(const Matrix<T> & m);
 /** Returns eigenvalues of 2x2 matrix */
 template <class T>
 vector<T> eigenvalues_2x2(const Matrix<T> & m);
+
+/**
+ Returns vector of pairs <eigenval, eigenvec> for given 2x2 matrix
+ */
+template <class T>
+vector<pair<T, vector<T>>> eigen_2x2(const Matrix<T> & m);
 
 #include "LA/linear_algebra_impl.h"
 

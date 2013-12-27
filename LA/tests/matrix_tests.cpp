@@ -121,6 +121,38 @@ void determinant5_test()
 	BOOST_REQUIRE(det(m) == 1);
 }
 
+void echelon_test1()
+{
+	Matrix<double> m = {
+		{  1,  2,  3,  4 },
+		{  5,  6,  7,  8 },
+		{  9, 10, 11, 12 },
+		{ 13, 14, 15, 16 }
+	};
+
+	Matrix<double> ech = {
+		{1,  0, -1, -2},
+		{0,  1,  2,  3}
+	};
+
+	BOOST_REQUIRE(echelon(m) == ech);
+}
+
+void echelon_test2()
+{
+	Matrix<float> m(
+		{
+			{ 1,  8, -9,  7,  5 },
+			{ 0,  1,  0,  4,  4 },
+			{ 0,  0,  1,  2,  5 },
+			{ 0,  0,  0,  1, -5 },
+			{ 0,  0,  0,  0,  1 }
+		}
+	);
+
+	BOOST_REQUIRE(echelon(m) == Matrix<float>::diag(5, 1));
+}
+
 void linear_solution_test()
 {
 	Matrix<float> a = {
@@ -145,42 +177,36 @@ void linear_solution_test()
 }
 
 template <class T>
-void eigenvalue_2x2_test(const Matrix<T> & m)
+void eigen_2x2_test(const Matrix<T> & m)
 {
-	vector<float> eigenvalues = eigenvalues_2x2(m);
-
-	Matrix<float> l0 = {
-		{ eigenvalues[0], 0 },
-		{ 0, eigenvalues[0] }
-	};
-
-	Matrix<float> l1 = {
-		{ eigenvalues[1], 0 },
-		{ 0, eigenvalues[1] }
-	};
-
-	BOOST_REQUIRE(det(l0 - m) == 0);
-	BOOST_REQUIRE(det(l1 - m) == 0);
+	Matrix<T> zeros(2, 1, 0);
+	vector<pair<T, vector<T>>> eigens = eigen_2x2(m);
+	for (const auto & eigen : eigens)
+	{
+		auto a = m - Matrix<T>::diag(2, eigen.first);
+		BOOST_REQUIRE(det(a) == 0);
+		BOOST_REQUIRE(a * eigen.second == zeros);
+	}
 }
 
-void eigenvalue_2x2_test1()
+void eigen_2x2_test1()
 {
 	Matrix<float> m = { 
 		{ 1, 2 },
 		{ 4, 3 }
 	};
-
-	eigenvalue_2x2_test(m);
+ 
+	eigen_2x2_test(m);
 }
 
-void eigenvalue_2x2_test2()
+void eigen_2x2_test2()
 {
 	Matrix<float> m = {
 		{ 1, -4 },
 		{ 4, -7 }
 	};
 
-	eigenvalue_2x2_test(m);
+	eigen_2x2_test(m);
 }
 
 void characteristic_polynomial_3x3_test()
@@ -221,10 +247,12 @@ boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *ar
 	test->add(BOOST_TEST_CASE(&determinant4_test));
 	test->add(BOOST_TEST_CASE(&determinant5_test));
 	test->add(BOOST_TEST_CASE(&linear_solution_test));
+	test->add(BOOST_TEST_CASE(&echelon_test1));
+	test->add(BOOST_TEST_CASE(&echelon_test2));
 	test->add(BOOST_TEST_CASE(&square_dist_test));
 	test->add(BOOST_TEST_CASE(&norm_test));
-	test->add(BOOST_TEST_CASE(&eigenvalue_2x2_test1));
-	test->add(BOOST_TEST_CASE(&eigenvalue_2x2_test2));
+	test->add(BOOST_TEST_CASE(&eigen_2x2_test1));
+	test->add(BOOST_TEST_CASE(&eigen_2x2_test2));
 	test->add(BOOST_TEST_CASE(&characteristic_polynomial_3x3_test));
 
     return test;

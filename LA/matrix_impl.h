@@ -206,9 +206,8 @@ Matrix<T> Matrix<T>::operator * (const vector<T> & v) const
 template <class T>
 Matrix<T> & Matrix<T>::operator *= (const T & t)
 {
-	for(auto & row : *this)
-		for (auto & el : row)
-			el *= t;
+	for (auto & row : *this)
+		row *= t; 
 
 	return *this;
 }
@@ -217,9 +216,8 @@ template <class T>
 Matrix<T> & Matrix<T>::operator /= (const T & t)
 {
 	for (auto & row : *this)
-		for (auto & el : row)
-			el /= t;
-
+		row /= t;
+		
 	return *this;
 }
 
@@ -242,13 +240,7 @@ Matrix<T> & Matrix<T>::operator += (const Matrix<T> & m2)
 	auto rit2 = m2.begin();
 
 	for (; rit1 != rit1End; ++rit1, ++rit2)
-	{
-		auto cit1 = rit1->begin(), cit1End = rit1->end();
-		auto cit2 = rit2->begin();
-
-		for (; cit1 != cit1End; ++cit1, ++cit2)
-			(*cit1) += (*cit2);
-	}
+		*rit1 += *rit2;
 
 	return m1;
 }
@@ -273,13 +265,7 @@ Matrix<T> & Matrix<T>::operator -= (const Matrix<T> & m2)
 	auto rit2 = m2.begin();
 
 	for (; rit1 != rit1End; ++rit1, ++rit2)
-	{
-		auto cit1 = rit1->begin(), cit1End = rit1->end();
-		auto cit2 = rit2->begin();
-
-		for (; cit1 != cit1End; ++cit1, ++cit2)
-			(*cit1) -= (*cit2);
-	}
+		*rit1 -= *rit2;
 
 	return m1;
 }

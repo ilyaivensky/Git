@@ -69,12 +69,47 @@ void make_vector_set(vector<T> & v)
 	v.erase(itEnd, v.end());
 }
 
-template <class T>
-T operator * (const vector<T> & v1, const vector<T> & v2)
-{
-	return inner_product(v1, v2);
+template <class T>T operator * (const vector<T> & v1, const vector<T> & v2)
+{	return inner_product(v1, v2);
 }
 
+template <class T>
+vector<T> & operator *= (vector<T> & v, const T & scalar)
+{
+	for (auto & el : v)
+		el *= scalar;
+
+	return v;
+}
+
+template <class T>
+vector<T> & operator /= (vector<T> & v, const T & scalar)
+{
+	for (auto & el : v)
+	if (el != 0) el /= scalar;
+
+	return v;
+}
+
+template <class T>
+vector<T> & operator += (vector<T> & v1, const vector<T> & v2)
+{
+	auto it2 = v2.begin();
+	for (auto it1 = v1.begin(), it1End = v1.end(); it1 != it1End; ++it1, ++it2)
+		*it1 += *it2;
+
+	return v1;
+}
+
+template <class T>
+vector<T> & operator -= (vector<T> & v1, const vector<T> & v2)
+{
+	auto it2 = v2.begin();
+	for (auto it1 = v1.begin(), it1End = v1.end(); it1 != it1End; ++it1, ++it2)
+		*it1 -= *it2;
+
+	return v1;
+}
 template <class T>
 ostream & operator<<(ostream & os, const vector<T> & v)
 {

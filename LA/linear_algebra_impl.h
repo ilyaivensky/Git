@@ -8,6 +8,7 @@
  */
 
 #include <limits>
+#include <cassert>
 
 template <class T>
 T tr(const Matrix<T> & m)
@@ -174,6 +175,9 @@ vector<T> solve_quadratic(const vector<T> & p)
 	T a2 = 2 * p[0];
 	T b = (-1) * p[1];
 
+	if (d == 0)
+		return vector<T>(1, (b / a2));
+
 	T root1 = (b - d) / a2;
 	T root2 = (b + d) / a2;
 
@@ -189,6 +193,102 @@ vector<T> eigenvalues_2x2(const Matrix<T> & m)
 	auto cp = characteristic_polynomial(m);
 
 	return solve_quadratic(cp);
+}
+
+template <class T>
+Matrix<T> echelon(const Matrix<T> & m)
+{
+	Matrix<T> a(m);
+	for (unsigned pivot_counter = 0, pivot_col = 0; pivot_col < a.ncol(); ++pivot_col)
+	{
+		// Find pivot for this column
+		unsigned pivot = pivot_counter;
+		for (; pivot < a.nrow(); ++pivot)
+		{
+			auto & row = a[pivot];
+			if (row[pivot_col] != 0)
+			{
+				T k = row[pivot_col];
+				if (row[pivot_col] != 1) row /= k;
+				break;
+			}
+		}
+
+		if (pivot == a.nrow())
+			continue;
+
+		auto & pivot_row = a[pivot];
+		// Substruct pivot row (multiplied by proper k) from each non-pivot row
+		for (unsigned r = 0; r < a.nrow(); ++r)
+		{
+			if (r == pivot)
+				continue;
+
+			auto & row = a[r];
+			T k = row[pivot_col];
+			for (unsigned c = pivot_col; c < a.ncol(); ++c)
+			{
+				if (row[c] == row[pivot_col]) row[c] = 0;
+				else row[c] -= pivot_row[c] * k;
+			}
+		}
+
+		if (pivot > pivot_counter)
+			std::swap(a[pivot], a[pivot_counter]);
+
+		++pivot_counter;
+	}
+
+	// Eliminate zero rows
+	// If there are any, they should be at the bottom of matrix
+	bool found_non_zero = false;
+	while (!a.empty() && !found_non_zero)
+	{
+		const auto & row = a.back();
+		
+		for (const auto & el : row)
+		if (el != 0)
+		{
+			found_non_zero = true;
+			break;
+		}
+		
+		if (!found_non_zero)
+			a.pop_back();
+	}
+
+	return a;
+}
+
+template <class T>
+vector<pair<T, vector<T>>> eigen_2x2(const Matrix<T> & m)
+{
+	auto eigenvalues = eigenvalues_2x2(m);
+
+	static Matrix<T> zeros(m.nrow(), 1);
+
+	vector<std::pair<T, vector<T>>> eigens;
+
+	for (const auto & eigenval : eigenvalues)
+	{
+		auto a = m - Matrix<T>::diag(m.nrow(), eigenval);
+		auto constraints = echelon(a);
+
+		// Because det(a) has to be 0
+		assert(constraints.nrow() == 1);
+		
+		/*
+		   constraints[0][0] has to be always 1 
+		   (because it is echelon form of a)
+		   so if we set eigenvec[0] to be 1,
+		   then eigenvec[1] = -1 / constraints[0][1]
+		   because a * eigenvec = 0
+		 */
+		vector<T> eigenvec = { 1, (-1) / constraints[0][1] };
+		eigens.push_back(make_pair(eigenval, eigenvec));
+	}
+	
+	return eigens;
 }
 
 
