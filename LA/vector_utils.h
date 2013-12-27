@@ -86,7 +86,7 @@ template <class T>
 vector<T> & operator /= (vector<T> & v, const T & scalar)
 {
 	for (auto & el : v)
-	if (el != 0) el /= scalar;
+		if (el != 0) el /= scalar; // special attention to el == 0 to work around -0 result
 
 	return v;
 }
