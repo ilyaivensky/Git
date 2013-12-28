@@ -8,6 +8,19 @@
 
 using namespace std;
 
+template <class T>
+bool is_zero(const vector<T> & v)
+{
+	static const T zero = T();
+	for (const auto & el : v)
+	{
+		if (el != zero)
+			return false;
+	}
+
+	return true;
+}
+
 template <class T> 
 T inner_product(const vector<T> & v1, const vector<T> & v2)
 {
@@ -59,6 +72,15 @@ T norm(const vector<T> & v, T p = 2)
 		sum += pow(val, p);
 
 	return pow(sum, 1/p);
+}
+
+template <class T>
+T cosine(const vector<T> & v1, const vector<T> & v2)
+{
+	if (!is_zero(v1) && v1 == v2) 
+		return 1;
+	
+	return (v1 * v2) / (norm(v1) * norm(v2));
 }
 
 template <class T>

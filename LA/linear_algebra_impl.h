@@ -241,20 +241,13 @@ Matrix<T> echelon(const Matrix<T> & m)
 
 	// Eliminate zero rows
 	// If there are any, they should be at the bottom of matrix
-	bool found_non_zero = false;
-	while (!a.empty() && !found_non_zero)
+	while (!a.empty())
 	{
 		const auto & row = a.back();
-		
-		for (const auto & el : row)
-		if (el != 0)
-		{
-			found_non_zero = true;
-			break;
-		}
-		
-		if (!found_non_zero)
+		if (is_zero(row))
 			a.pop_back();
+		else
+			break;
 	}
 
 	return a;
