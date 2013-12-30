@@ -11,6 +11,7 @@
  */
 
 #include "LA/matrix.h"
+#include <tuple>
 
 // Returns trace of matrix
 template <class T>
@@ -21,7 +22,10 @@ T tr(const Matrix<T> & m);
 template <class T>
 T det(const Matrix<T> & m);
 
-// Returns m^(-1)
+/** 
+ Returns m^(-1)
+ Implements Gauss-Jordan elimination
+ */
 template <class T>
 Matrix<T> inv(const Matrix<T> & m);
 
@@ -51,8 +55,18 @@ bool is_square(const Matrix<T> & m) { return m.nrow() == m.ncol(); }
 template <class T>
 bool is_singular(const Matrix<T> & m) { return !is_square(m) || det(m) == 0; }
 
+/**
+ Factorizes matrix A into L (lower triangular), U (upper triangular) and P (permutation matrix)
+ such as PA = LU
+ */
 template <class T>
-Matrix<T> echelon(const Matrix<T> & m);
+tuple<Matrix<T>, Matrix<T>, Matrix<T>> lu(const Matrix<T> & m);
+
+/**
+ Returns row reduced echelon form (RREF) of m
+ */
+template <class T>
+Matrix<T> rref(const Matrix<T> & m);
 
 template <class T> 
 Matrix<T> linear_solution(const Matrix<T> & a, const Matrix<T> & y) { return inv(a) * y; } 

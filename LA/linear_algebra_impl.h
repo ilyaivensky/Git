@@ -98,45 +98,36 @@ Matrix<T> cov(const Matrix<T> & m)
 template <class T>
 Matrix<T> inv(const Matrix<T> & m)
 {
-	if (is_singular(m))
-		throw exception("cannot inverse singular matrix\n");
+	if (!is_square(m))
+		throw exception("cannot inverse non-square matrix\n");
 
-	Matrix<T> matrix(m);
-	unsigned n = matrix.size();
-	Matrix<T> inverse(n);
-
-	// Init inverse as ident matrix
-	for (unsigned i = 0; i < n; ++i)
-		inverse[i][i] = 1.0;
-
-	for (unsigned i = 0; i < n; ++i)
+	unsigned n = m.size();
+	Matrix<T> upper = m, inverse = Matrix<T>::diag(n, 1);
+	
+	for (unsigned pivot = 0; pivot < n; ++pivot)
 	{
-		for (unsigned j = 0; j < n; ++j)
+		for (unsigned r = 0; r < n; ++r)
 		{
-			if (i != j)
+			if (r != pivot)
 			{
-				if (matrix[i][i] == 0.0)
+				if (upper[pivot][pivot] == 0)
 					throw exception("matrix cannot be inverted\n");
-				T ratio = matrix[j][i]/matrix[i][i];
-				for (unsigned k = 0; k < n; ++k)
-				{
-					matrix[j][k] -= ratio * matrix[i][k];
-					inverse[j][k] -= ratio * inverse[i][k];
-				}
+				
+				T ratio = upper[r][pivot]/upper[pivot][pivot];
+
+				upper[r] -= upper[pivot] * ratio;
+				inverse[r] -= inverse[pivot] * ratio;
 			}
 		}
 	}
 
 	for (unsigned i = 0; i < n; ++i)
 	{
-		T a = matrix[i][i];
-		if (a == 0.0)
+		T a = upper[i][i];
+		if (a == 0)
 			throw exception("matrix cannot be inverted\n");
-		for (unsigned j = 0; j < n; ++j)
-		{
-			matrix[i][j] /= a;
-			inverse[i][j] /= a;
-		}
+
+		inverse[i] /= a;
 	}
 
 	return inverse;
@@ -196,47 +187,177 @@ vector<T> eigenvalues_2x2(const Matrix<T> & m)
 }
 
 template <class T>
-Matrix<T> echelon(const Matrix<T> & m)
+tuple <Matrix<T>, Matrix<T>, Matrix<T>> lu(const Matrix<T> & m)
+{
+	if (!is_square(m))
+		throw exception("lu: m is not square");
+
+	Matrix<T> lower(Matrix<T>::diag(m.nrow(), 1));
+	Matrix<T> upper(m);
+	Matrix<T> permutation(Matrix<T>::diag(m.nrow(), 1));
+
+	unsigned n = m.nrow();
+
+	// Find the optimal permutation matrix (P)
+	for (unsigned pivot = 0; pivot < n; ++pivot)
+	{
+		T max_pivot = 0;
+		unsigned max_pivot_row = m.nrow();
+		for (unsigned r = pivot; r < n; ++r)
+		{
+			if (abs(upper[r][pivot]) > abs(max_pivot))
+			{
+				max_pivot_row = r;
+				max_pivot = upper[r][pivot];
+			}
+		}
+
+		if (max_pivot == 0)
+			throw exception("lu: cannot decompose m because it is singular");
+
+		if (max_pivot_row != pivot)
+		{
+			swap(upper[max_pivot_row], upper[pivot]);
+			swap(permutation[max_pivot_row], permutation[pivot]);
+		}
+	}
+
+	// Generate lower (L) and upper (U) matrices
+	for (unsigned pivot = 0; pivot < n; ++pivot)
+	{
+		for (unsigned r = pivot + 1; r < n; ++r)
+		{
+			T ratio = upper[r][pivot] / upper[pivot][pivot];
+			upper[r] -= upper[pivot] * ratio;
+			lower[r][pivot] = ratio;
+		}
+	}
+
+	return make_tuple(lower, upper, permutation);
+}
+
+template <class T>
+Matrix<T> rref_int(const Matrix<T> & m)
 {
 	Matrix<T> a(m);
-	for (unsigned pivot_counter = 0, pivot_col = 0; pivot_col < a.ncol(); ++pivot_col)
+	for (unsigned pivot_row = 0, pivot_col = 0; pivot_col < a.ncol(); ++pivot_col)
 	{
-		// Find pivot for this column
-		unsigned pivot = pivot_counter;
-		for (; pivot < a.nrow(); ++pivot)
+		// Find the best pivot row for this column
+		T pivot = 0;
+		unsigned max_pivot_row = m.nrow();
+		for (unsigned r = pivot_row; r < a.nrow(); ++r)
 		{
-			auto & row = a[pivot];
+			auto & row = a[r];
 			if (row[pivot_col] != 0)
 			{
-				T k = row[pivot_col];
-				if (row[pivot_col] != 1) row /= k;
+				pivot = row[pivot_col];
+				max_pivot_row = r;
 				break;
 			}
 		}
 
-		if (pivot == a.nrow())
+		if (pivot == 0)
 			continue;
 
-		auto & pivot_row = a[pivot];
+		auto k = a[max_pivot_row][pivot_col];
+		if (k != 1) a[max_pivot_row] /= k;
+
+		if (max_pivot_row != pivot_row)
+			swap(a[max_pivot_row], a[pivot_row]);
+
+		auto & prow = a[pivot_row];
 		// Substruct pivot row (multiplied by proper k) from each non-pivot row
 		for (unsigned r = 0; r < a.nrow(); ++r)
 		{
-			if (r == pivot)
+			if (r == pivot_row)
 				continue;
 
 			auto & row = a[r];
-			T k = row[pivot_col];
+			auto k = row[pivot_col];
 			for (unsigned c = pivot_col; c < a.ncol(); ++c)
 			{
 				if (row[c] == row[pivot_col]) row[c] = 0;
-				else row[c] -= pivot_row[c] * k;
+				else row[c] -= prow[c] * k;
 			}
 		}
 
-		if (pivot > pivot_counter)
-			std::swap(a[pivot], a[pivot_counter]);
+		++pivot_row;
+	}
 
-		++pivot_counter;
+	// Eliminate zero rows
+	// If there are any, they should be at the bottom of matrix
+	while (!a.empty())
+	{
+		const auto & row = a.back();
+		if (is_zero(row))
+			a.pop_back();
+		else
+			break;
+	}
+
+	return a;
+}
+
+Matrix<int> rref(const Matrix<int> & m)
+{
+	return rref_int(m);
+}
+
+Matrix<long> rref(const Matrix<long> & m)
+{
+	return rref_int(m);
+}
+
+template <class T>
+Matrix<T> rref(const Matrix<T> & m)
+{
+	Matrix<T> a(m);
+	for (unsigned pivot_row = 0, pivot_col = 0; pivot_col < a.ncol(); ++pivot_col)
+	{
+		// Find the best pivot row for this column
+		T max_pivot = 0;
+		unsigned max_pivot_row = m.nrow();
+		for (unsigned r = pivot_row; r < a.nrow(); ++r)
+		{
+			auto & row = a[r];
+			if (abs(row[pivot_col]) > abs(max_pivot))
+			{
+				max_pivot = row[pivot_col];
+				max_pivot_row = r;
+			}
+		}
+
+		if (max_pivot == 0)
+			continue;
+
+		auto k = a[max_pivot_row][pivot_col];
+		if (k != 1) a[max_pivot_row] /= k;
+
+		if (max_pivot_row != pivot_row)
+			swap(a[max_pivot_row], a[pivot_row]);
+
+		auto & prow = a[pivot_row];
+		// Substruct pivot row (multiplied by proper k) from each non-pivot row
+		for (unsigned r = 0; r < a.nrow(); ++r)
+		{
+			if (r == pivot_row)
+				continue;
+
+			auto & row = a[r];
+			auto k = row[pivot_col];
+			for (unsigned c = pivot_col; c < a.ncol(); ++c)
+			{
+				if (row[c] == row[pivot_col]) row[c] = 0;
+				else
+				{
+					row[c] -= prow[c] * k;
+					auto rounded = round(row[c]);
+					if (fabs(row[c] - rounded) < EPSILON) row[c] = rounded;
+				}
+			}
+		}
+
+		++pivot_row;
 	}
 
 	// Eliminate zero rows
@@ -265,7 +386,7 @@ vector<pair<T, vector<T>>> eigen_2x2(const Matrix<T> & m)
 	for (const auto & eigenval : eigenvalues)
 	{
 		auto a = m - Matrix<T>::diag(m.nrow(), eigenval);
-		auto constraints = echelon(a);
+		auto constraints = rref(a);
 
 		// Because det(a) has to be 0
 		assert(constraints.nrow() == 1);

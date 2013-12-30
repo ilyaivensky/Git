@@ -121,7 +121,7 @@ void determinant5_test()
 	BOOST_REQUIRE(det(m) == 1);
 }
 
-void echelon_test1()
+void rref_test1()
 {
 	Matrix<double> m = {
 		{  1,  2,  3,  4 },
@@ -135,12 +135,14 @@ void echelon_test1()
 		{0,  1,  2,  3}
 	};
 
-	BOOST_REQUIRE(echelon(m) == ech);
+	auto res = rref(m);
+
+	BOOST_REQUIRE(res == ech);
 }
 
-void echelon_test2()
+void rref_test2()
 {
-	Matrix<float> m(
+	Matrix<int> m(
 		{
 			{ 1,  8, -9,  7,  5 },
 			{ 0,  1,  0,  4,  4 },
@@ -150,7 +152,7 @@ void echelon_test2()
 		}
 	);
 
-	BOOST_REQUIRE(echelon(m) == Matrix<float>::diag(5, 1));
+	BOOST_REQUIRE(rref(m) == Matrix<int>::diag(5, 1));
 }
 
 void linear_solution_test()
@@ -235,6 +237,35 @@ void norm_test()
 	BOOST_REQUIRE(norm(v) == 5);
 }
 
+void lu_test1()
+{
+	Matrix<double> pasc = {
+		{ 1,  1,  1,  1 },
+		{ 1,  2,  3,  4 },
+		{ 1,  3,  6, 10 },
+		{ 1,  4, 10, 20 }
+	};
+
+	Matrix<double> p, l, u;
+	tie(l, u, p) = lu(pasc);
+
+	BOOST_REQUIRE(p * l * u == pasc);
+}
+
+void lu_test2()
+{
+	Matrix<double> m = {
+		{ 0, 1, 1 },
+		{ 1, 2, 1 },
+		{ 2, 7, 9 }
+	};
+
+	Matrix<double> p, l, u;
+	tie(l, u, p) = lu(m);
+
+	BOOST_REQUIRE(p * l * u == m);
+}
+
 boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *argv[])
 {
     test_suite* test = BOOST_TEST_SUITE("Matrix test suite");
@@ -247,13 +278,15 @@ boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *ar
 	test->add(BOOST_TEST_CASE(&determinant4_test));
 	test->add(BOOST_TEST_CASE(&determinant5_test));
 	test->add(BOOST_TEST_CASE(&linear_solution_test));
-	test->add(BOOST_TEST_CASE(&echelon_test1));
-	test->add(BOOST_TEST_CASE(&echelon_test2));
+	test->add(BOOST_TEST_CASE(&rref_test1));
+	test->add(BOOST_TEST_CASE(&rref_test2));
 	test->add(BOOST_TEST_CASE(&square_dist_test));
 	test->add(BOOST_TEST_CASE(&norm_test));
 	test->add(BOOST_TEST_CASE(&eigen_2x2_test1));
 	test->add(BOOST_TEST_CASE(&eigen_2x2_test2));
 	test->add(BOOST_TEST_CASE(&characteristic_polynomial_3x3_test));
+	test->add(BOOST_TEST_CASE(&lu_test1));
+	test->add(BOOST_TEST_CASE(&lu_test2));
 
     return test;
 }

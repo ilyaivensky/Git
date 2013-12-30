@@ -5,8 +5,9 @@
 #include <cstdlib>
 
 //#include "LA/matrix.h"
-
 using namespace std;
+
+#define EPSILON 1e-5
 
 template <class T>
 bool is_zero(const vector<T> & v)
@@ -91,8 +92,10 @@ void make_vector_set(vector<T> & v)
 	v.erase(itEnd, v.end());
 }
 
-template <class T>T operator * (const vector<T> & v1, const vector<T> & v2)
-{	return inner_product(v1, v2);
+template <class T>
+T operator * (const vector<T> & v1, const vector<T> & v2)
+{
+	return inner_product(v1, v2);
 }
 
 template <class T>
@@ -105,12 +108,54 @@ vector<T> & operator *= (vector<T> & v, const T & scalar)
 }
 
 template <class T>
+vector<T> operator * (const vector<T> & v, const T & scalar)
+{
+	vector<T> tmp = v;
+	tmp *= scalar;
+	
+	return tmp;
+}
+
+vector<long> & operator /= (vector<long> & v, long scalar)
+{
+	for (auto & el : v)
+	{
+		el /= scalar;
+	}
+
+	return v;
+}
+
+vector<int> & operator /= (vector<int> & v, int scalar)
+{
+	for (auto & el : v)
+	{
+		el /= scalar;
+	}
+
+	return v;
+}
+
+template <class T>
 vector<T> & operator /= (vector<T> & v, const T & scalar)
 {
 	for (auto & el : v)
-		if (el != 0) el /= scalar; // special attention to el == 0 to work around -0 result
+	{
+		el /= scalar;
+		auto rounded = round(el);
+		if (fabs(el - rounded) < EPSILON) el = rounded;
+	}
 
 	return v;
+}
+
+template <class T>
+vector<T> operator / (const vector<T> & v, const T & scalar)
+{
+	vector<T> tmp = v;
+	tmp /= scalar;
+
+	return tmp;
 }
 
 template <class T>
