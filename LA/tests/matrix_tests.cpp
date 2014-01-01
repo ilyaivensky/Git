@@ -233,8 +233,11 @@ void square_dist_test()
 
 void norm_test()
 {
-	vector<double> v = { 3, 4 };
-	BOOST_REQUIRE(norm(v) == 5);
+	vector<int> vi = { 3, 4 };
+	BOOST_REQUIRE(norm(vi, 2) == 5);
+
+	vector<float> vf = { 3, 4 };
+	BOOST_REQUIRE(norm(vf, 2) == 5);
 }
 
 void lu_test1()
@@ -249,7 +252,7 @@ void lu_test1()
 	Matrix<double> p, l, u;
 	tie(l, u, p) = lu(pasc);
 
-	BOOST_REQUIRE(p * l * u == pasc);
+	BOOST_REQUIRE(l * u == p * pasc);
 }
 
 void lu_test2()
@@ -263,7 +266,7 @@ void lu_test2()
 	Matrix<double> p, l, u;
 	tie(l, u, p) = lu(m);
 
-	BOOST_REQUIRE(p * l * u == m);
+	BOOST_REQUIRE(l * u == p * m);
 }
 
 boost::unit_test_framework::test_suite * init_unit_test_suite(int argc, char *argv[])

@@ -1,6 +1,3 @@
-#ifndef _LINEAR_ALGEBRA_H_
-#define _LINEAR_ALGEBRA_H_
-
 /*                                                                 -*- C++ -*-
  * File: linear_algebra.h
  * 
@@ -9,6 +6,9 @@
  * Created on: Dec 7, 2013
  *   
  */
+
+#ifndef _LINEAR_ALGEBRA_H_
+#define _LINEAR_ALGEBRA_H_
 
 #include "LA/matrix.h"
 #include <tuple>
